@@ -3,6 +3,7 @@ from pandac.PandaModules import *
 from otp.ai.AIZoneData import AIZoneDataStore
 from otp.ai.MagicWordManagerAI import MagicWordManagerAI
 from otp.ai.TimeManagerAI import TimeManagerAI
+from toontown.environment.TemperatureManagerAI import TemperatureManagerAI
 from otp.ai import BanManagerAI
 from otp.distributed.OtpDoGlobals import *
 from otp.friends.FriendManagerAI import FriendManagerAI
@@ -24,6 +25,7 @@ from toontown.coghq import LawOfficeManagerAI
 from toontown.coghq import MintManagerAI
 from toontown.distributed.ToontownDistrictAI import ToontownDistrictAI
 from toontown.distributed.ToontownDistrictStatsAI import ToontownDistrictStatsAI
+from toontown.distributed.ShardStatus import ShardStatusSender
 from toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
 from toontown.dna.DNAParser import loadDNAFileAI
 from toontown.estate.EstateManagerAI import EstateManagerAI
@@ -117,6 +119,9 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.mailboxZeroMgr.generateWithRequired(2)
         self.trashcanZeroMgr = DistributedTrashcanZeroMgrAI.DistributedTrashcanZeroMgrAI(self)
         self.trashcanZeroMgr.generateWithRequired(2)
+        self.temperatureManager = TemperatureManagerAI(self)
+		
+        self.statusSender = ShardStatusSender(self)
         
         if self.wantFishing:
             self.fishManager = FishManagerAI(self)
@@ -233,6 +238,10 @@ class ToontownAIRepository(ToontownInternalRepository):
 
     def decrementPopulation(self):
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() - 1)
+		
+    def setHour(self, hour):
+        self.districtStats.b_setHour(hour)
+        self.statusSender.sendStatus()
 
     def allocateZone(self):
         return self.zoneAllocator.allocate()

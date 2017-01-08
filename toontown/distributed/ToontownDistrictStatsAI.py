@@ -10,6 +10,7 @@ class ToontownDistrictStatsAI(DistributedObjectAI):
         self.avatarCount = 0
         self.newAvatarCount = 0
         self.invasionStatus = 0
+        self.currenthour = 0
 
     def announceGenerate(self):
         DistributedObjectAI.announceGenerate(self)
@@ -78,3 +79,16 @@ class ToontownDistrictStatsAI(DistributedObjectAI):
 
     def getInvasionStatus(self):
         return self.invasionStatus
+		
+    def setHour(self, hour):
+        self.currenthour = hour
+
+    def getHour(self):
+        return self.currenthour
+
+    def d_setHour(self, hour):
+        self.sendUpdate('setHour', [hour])
+
+    def b_setHour(self, hour):
+        self.d_setHour(hour)
+        self.setHour(hour)

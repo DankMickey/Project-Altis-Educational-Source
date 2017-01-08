@@ -11,6 +11,8 @@ from toontown.suit import DistributedSuitPlannerAI
 from toontown.toon import NPCToons
 from toontown.toonbase import TTLocalizer
 from toontown.toonbase import ToontownGlobals
+from toontown.environment import DistributedDayTimeManagerAI
+from toontown.environment import DistributedRainManagerAI
 
 class HoodAI:
     notify = directNotify.newCategory('HoodAI')
@@ -33,6 +35,9 @@ class HoodAI:
             dnaData = simbase.air.loadDNAFileAI(dnaStore, dnaFileName)
             self.air.dnaStoreMap[zoneId] = dnaStore
             self.air.dnaDataMap[zoneId] = dnaData
+			
+        self.createTime()
+        self.createRain()
 
     def getZoneTable(self):
         zoneTable = [self.zoneId]
@@ -188,3 +193,17 @@ class HoodAI:
             suitPlanner.initTasks()
             self.suitPlanners.append(suitPlanner)
             self.air.suitPlanners[zoneId] = suitPlanner
+			
+    def createTime(self):
+        for zoneId in self.getZoneTable():
+            if zoneId not in [9000, 9100, 9200]:
+                self.dayTimeMgr = DistributedDayTimeManagerAI.DistributedDayTimeManagerAI(self.air)
+                self.dayTimeMgr.generateWithRequired(zoneId)
+                self.notify.info('Day Time Manager turned on for zone ' + str(zoneId))
+            
+    def createRain(self):
+        for zoneId in self.getZoneTable():
+            if zoneId not in [3000, 3100, 3200, 3300]:
+                self.rainMgr = DistributedRainManagerAI.DistributedRainManagerAI(self.air)
+                self.rainMgr.generateWithRequired(zoneId)
+                self.notify.info('Rain Manager turned on for zone ' + str(zoneId))

@@ -29,8 +29,13 @@ class Hood(StateData.StateData):
         self.titleText = None
         self.titleColor = (1, 1, 1, 1)
         self.holidayStorageDNADict = {}
-        self.spookySkyFile = None
+        self.spookySkyFiles = None
         self.snowySkyFile = 'phase_3.5/models/props/BR_sky'
+        self.mmlSkyFile = 'phase_6/models/props/MM_sky'
+        self.daySkyFile = 'phase_3.5/models/props/TT_sky'
+        self.nightSkyFile = 'phase_8/models/props/DL_sky'
+        self.oldSky = None
+        self.newSky = None
         self.halloweenLights = []
 
     def enter(self, requestStatus):
@@ -283,3 +288,57 @@ class Hood(StateData.StateData):
             self.sky.setTag('sky', 'Regular')
             self.sky.setScale(1.0)
             self.startSky()
+			
+    def end(self):
+        if hasattr(self, 'newSky'):
+            if self.newSky:
+                self.sky = self.newSky
+        if hasattr(self, 'oldSky'):
+            if self.oldSky:
+                self.oldSky.reparentTo(hidden)
+        self.oldSky = None
+        self.newSky = None
+			
+    def skyTransition(self, sky):
+        if self.id != DonaldsDreamland or self.id != DonaldsDock or self.id != TheBrrrgh:
+            if hasattr(self, 'sky'):
+                self.oldSky = self.sky
+            if sky == 'mml':
+                self.newSky = loader.loadModel(self.mmlSkyFile)
+                self.newSky.setTag('sky', 'MML')
+            if sky == 'day':
+                self.newSky = loader.loadModel(self.daySkyFile)
+                self.newSky.setTag('sky', 'Day')
+            if sky == 'night':
+                self.newSky = loader.loadModel(self.nightSkyFile)
+                self.newSky.setTag('sky', 'Night')
+            if sky == 'rain':
+                self.newSky = loader.loadModel(self.snowySkyFile)
+                self.newSky.setTag('sky', 'Rain')
+            if self.oldSky:
+                self.oldSky.setTransparency(TransparencyAttrib.MDual, 1)
+            if self.newSky:
+                self.newSky.setTransparency(TransparencyAttrib.MDual, 1)
+                self.newSky.setScale(1.0)
+                self.newSky.setDepthTest(0)
+                self.newSky.setDepthWrite(0)
+                self.newSky.setColorScale(1, 1, 1, 0)
+                self.newSky.setBin('background', 100)
+                self.newSky.setFogOff()
+                self.newSky.setZ(0.0)
+                self.newSky.setHpr(0.0, 0.0, 0.0)
+                ce = CompassEffect.make(NodePath(), CompassEffect.PRot | CompassEffect.PZ)
+                self.newSky.node().setEffect(ce)
+                self.newSky.reparentTo(camera)
+                newFadeIn = LerpColorScaleInterval(self.newSky, 3, Vec4(1, 1, 1, 1), startColorScale=Vec4(1, 1, 1, 0), blendType='easeInOut')
+                if self.oldSky:
+                    oldFadeOut = LerpColorScaleInterval(self.oldSky, 3, Vec4(1, 1, 1, 0), startColorScale=Vec4(1, 1, 1, 1), blendType='easeInOut')
+                else:
+                    oldFadeOut = Wait(0) # Just do that to please the sequence so it doesnt crash
+                Sequence(
+                    Parallel(
+                        newFadeIn,
+                        oldFadeOut
+                    ),
+                    Func(self.end)
+                ).start()
