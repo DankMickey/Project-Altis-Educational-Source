@@ -29,6 +29,11 @@ class DNADoor(DNAGroup.DNAGroup):
     def getClassType(self):
         return self.__name__
 
+    def __del__(self):
+        DNAGroup.DNAGroup.__del__(self)
+        del self.code
+        del self.color
+
     @staticmethod
     def setupDoor(doorNodePath, parentNode, doorOrigin, dnaStore, block, color):
         doorNodePath.setPosHprScale(doorOrigin, LVecBase3f(0), LVecBase3f(0), LVecBase3f(1))
