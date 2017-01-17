@@ -3150,6 +3150,7 @@ dclass DistributedLawbotBoss : DistributedBossCog {
   setTaunt(int8, int8) broadcast;
   toonGotHealed(uint32) broadcast;
   enteredBonusState() broadcast;
+  flipScale() broadcast;
   setBattleDifficulty(uint8) broadcast ram;
 };
 

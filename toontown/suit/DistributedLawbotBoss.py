@@ -626,6 +626,11 @@ class DistributedLawbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
             self.baseTopCol.unstash()
             self.baseSideCol.unstash()
             self.baseColStashed = False
+			
+    def flipScale(self):
+        rotateIval = LerpHprInterval(self.scaleNodePath, 1, (self.scaleNodePath.getH() + 180,self.scaleNodePath.getP(), self.scaleNodePath.getR()), self.scaleNodePath.getHpr())
+        rotateIval.start()
+        self.makeScaleReflectDamage()
 
     def makeScaleReflectDamage(self):
         diffDamage = self.bossDamage - ToontownGlobals.LawbotBossInitialDamage

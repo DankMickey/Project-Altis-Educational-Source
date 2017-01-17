@@ -165,6 +165,9 @@ class DistributedLawbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM
         if tauntIndex == 0 and self.involvedToons:
             extraInfo = random.randrange(len(self.involvedToons))
         self.sendUpdate('setTaunt', [tauntIndex, extraInfo])
+		
+    def flipScale(self, null):
+        self.sendUpdate('flipScale', [])
 
     def doNextAttack(self, task):
         for lawyer in self.lawyers:
@@ -177,6 +180,7 @@ class DistributedLawbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM
         self.notify.debug('allowedByTime=%d doAttack=%d' % (allowedByTime, doAttack))
         if doAttack <= ToontownGlobals.LawbotBossChanceToDoAreaAttack and allowedByTime:
             self.__doAreaAttack()
+            taskMgr.doMethodLater(4.36, self.flipScale, self.uniqueName('flipScale'))
             self.numAreaAttacks += 1
             self.lastAreaAttackTime = globalClock.getFrameTime()
         else:
@@ -749,7 +753,7 @@ class DistributedLawbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM
         for toonId in self.involvedToons:
             toon = simbase.air.doId2do.get(toonId)
             if toon:
-                toon.d_setPieType(8)
+                toon.d_setPieType(7)
 
     def takeAwayPies(self):
         for toonId in self.involvedToons:
