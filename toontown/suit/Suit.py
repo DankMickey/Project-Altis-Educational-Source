@@ -404,6 +404,7 @@ class Suit(Avatar.Avatar):
         self.healthCondition = 0
         self.isDisguised = 0
         self.isWaiter = 0
+        self.isHealthColored = 0
         self.isRental = 0
 
     def delete(self):
@@ -711,6 +712,15 @@ class Suit(Avatar.Avatar):
         else:
             condition = 5
         if self.healthCondition != condition or forceUpdate:
+            actorNode = self.find('**/__Actor_modelRoot')
+            actorCollection = actorNode.findAllMatches('*')
+            for thingIndex in xrange(0, actorCollection.getNumPaths()):
+                thing = actorCollection[thingIndex]
+                if thing.getName() not in ('joint_attachMeter', 'joint_nameTag', 'def_nameTag'):
+                    thing.setColorScale(self.healthColors[4])
+                    thing.setAttrib(ColorBlendAttrib.make(ColorBlendAttrib.MAdd))
+                    thing.setDepthWrite(False)
+                    thing.setBin('fixed', 1) 
             if condition == 4:
                 blinkTask = Task.loop(Task(self.__blinkRed), Task.pause(0.75), Task(self.__blinkGray), Task.pause(0.1))
                 taskMgr.add(blinkTask, self.uniqueName('blink-task'))
@@ -725,8 +735,16 @@ class Suit(Avatar.Avatar):
             self.healthCondition = condition
 
     def __blinkRed(self, task):
+        if self.isHealthColored:
+            actorNode = self.find('**/__Actor_modelRoot')
+            actorCollection = actorNode.findAllMatches('*')
+            for thingIndex in xrange(0, actorCollection.getNumPaths()):
+                thing = actorCollection[thingIndex]
+                if thing.getName() not in ('joint_attachMeter', 'joint_nameTag', 'def_nameTag'):
+                    thing.setColorScale(self.healthColors[3], 1)
         self.healthBar.setColor(self.healthColors[3], 1)
-        self.healthBarGlow.setColor(self.healthGlowColors[3], 1)
+        if self.healthBar != self:
+            self.healthBarGlow.setColor(self.healthGlowColors[3], 1)
         if self.healthCondition == 5:
             self.healthBar.setScale(1.17)
         
@@ -735,9 +753,20 @@ class Suit(Avatar.Avatar):
     def __blinkGray(self, task):
         if not self.healthBar:
             return
-        
+			
+        if self.isHealthColored:
+            actorNode = self.find('**/__Actor_modelRoot')
+            actorCollection = actorNode.findAllMatches('*')
+            for thingIndex in xrange(0, actorCollection.getNumPaths()):
+                thing = actorCollection[thingIndex]
+                if thing.getName() not in ('joint_attachMeter', 'joint_nameTag', 'def_nameTag'):
+                    thing.setColorScale(self.healthColors[4])
+                    thing.setAttrib(ColorBlendAttrib.make(ColorBlendAttrib.MAdd))
+                    thing.setDepthWrite(False)
+                    thing.setBin('fixed', 1) 
         self.healthBar.setColor(self.healthColors[4], 1)
-        self.healthBarGlow.setColor(self.healthGlowColors[4], 1)
+        if self.healthBar != self:
+            self.healthBarGlow.setColor(self.healthGlowColors[4], 1)
         if self.healthCondition == 5:
             self.healthBar.setScale(1.0)
         

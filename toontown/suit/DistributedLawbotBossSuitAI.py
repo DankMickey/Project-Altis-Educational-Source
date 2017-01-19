@@ -47,7 +47,7 @@ class DistributedLawbotBossSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
         DistributedSuitBaseAI.DistributedSuitBaseAI.generate(self)
         if self.virtual:
             self.sendUpdate('setSkelecog', [1])
-            self.sendUpdate('setVirtual', [1])
+            self.sendUpdate('setVirtual', [1, 1])
 
     def requestBattle(self, x, y, z, h, p, r):
         toonId = self.air.getAvatarIdFromSender()
@@ -98,7 +98,7 @@ class DistributedLawbotBossSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
             toonHpr = toon.getHpr()
             z2 = toonPos[2] + 1.3
             toonPos = Point3(toonPos.getX(), toonPos.getY(), 0)
-            if random.random() < 1 and self.getVirtual():
+            if random.random() < 1 and self.getVirtual()[0]:
                 self.sendUpdate('teleportToToon', [toonPos[0], toonPos[1], toonPos[2], toonHpr[0], toonHpr[1], toonHpr[2], toonToAttackId])
             else:
                 lawyerPos = self.getPos()
@@ -145,7 +145,7 @@ class DistributedLawbotBossSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
 
     def hitByToon(self):
         self.notify.debug('I got hit by a toon')
-        if not self.stunned and not self.getVirtual():
+        if not self.stunned and not self.getVirtual()[0]:
             curTime = globalClockDelta.getRealNetworkTime()
             deltaTime = curTime - self.timeProsecuteStarted
             deltaTime /= 100.0
@@ -159,9 +159,10 @@ class DistributedLawbotBossSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
             taskMgr.doMethodLater(ToontownGlobals.LawbotBossLawyerStunTime, self.unStun, taskName)
             if self.boss:
                 self.boss.checkForBonusState()
-        if self.getVirtual():
-           self.b_setHP(self.getHP() - 20)
-           self.sendUpdate('hitVirtualCog', [self.getHP()])
+        if self.getVirtual()[0]:
+           hp = self.getHP()
+           self.b_setHP(hp - 20)
+           self.sendUpdate('hitVirtualCog', [20])
 
     def setStun(self, val):
         self.stunned = val

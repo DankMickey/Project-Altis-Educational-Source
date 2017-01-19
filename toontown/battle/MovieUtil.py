@@ -166,7 +166,7 @@ def avatarFacePoint(av, other = render):
 
 def insertDeathSuit(suit, deathSuit, battle = None, pos = None, hpr = None):
     holdParent = suit.getParent()
-    if suit.getVirtual():
+    if suit.getVirtual()[0]:
         virtualize(deathSuit)
     avatarHide(suit)
     if deathSuit != None and not deathSuit.isEmpty():
@@ -189,7 +189,7 @@ def removeDeathSuit(suit, deathSuit):
 		
 def insertZapSuit(suit, zapSuit, battle = None, pos = None, hpr = None):
     holdParent = suit.getParent()
-    if suit.getVirtual():
+    if suit.getVirtual()[0]:
         virtualize(zapSuit)
     if zapSuit != None and not zapSuit.isEmpty():
         if holdParent and 0:
@@ -211,7 +211,7 @@ def removeZapSuit(suit, zapSuit):
 
 def insertReviveSuit(suit, deathSuit, battle = None, pos = None, hpr = None):
     holdParent = suit.getParent()
-    if suit.getVirtual():
+    if suit.getVirtual()[0]:
         virtualize(deathSuit)
     suit.hide()
     if deathSuit != None and not deathSuit.isEmpty():

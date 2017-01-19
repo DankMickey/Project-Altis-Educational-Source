@@ -18,6 +18,7 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
         self.zoneId = 0
         self.dna = SuitDNA.SuitDNA()
         self.virtual = 0
+        self.healthColored = 0
         self.waiter = 0
         self.skeleRevives = 0
         self.maxSkeleRevives = 0
@@ -53,6 +54,8 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
         hp = attributes['hp'][self.level]
         self.maxHP = hp
         self.currHP = hp
+        self.sendUpdate('setMaxHP', [self.maxHp])
+        self.sendUpdate('setHP', [self.currHp])
 
     def getLevelDist(self):
         return self.getLevel()
@@ -168,12 +171,13 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
     def isSupervisor(self):
         return 0
 
-    def setVirtual(self, virtual):
-        self.sendUpdate('setVirtual', [virtual])
+    def setVirtual(self, virtual, healthColored=0):
+        self.sendUpdate('setVirtual', [virtual, healthColored])
         self.virtual = virtual
+        self.healthColored = healthColored
 
     def getVirtual(self):
-        return self.virtual
+        return [self.virtual, self.healthColored]
 
     def isVirtual(self):
         return self.getVirtual()

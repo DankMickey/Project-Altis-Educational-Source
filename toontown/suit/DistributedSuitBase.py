@@ -40,6 +40,9 @@ class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBa
         SuitBase.SuitBase.__init__(self)
         self.activeShadow = 0
         self.virtual = 0
+        self.healthColored = 0
+        self.maxHP = 10
+        self.currHP = 10
         self.battleDetectName = None
         self.cRay = None
         self.cRayNode = None
@@ -59,8 +62,10 @@ class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBa
         self.sillySurgeText = False
         self.interactivePropTrackBonus = -1
 
-    def setVirtual(self, isVirtual = 1):
+    def setVirtual(self, isVirtual = 1, healthColored = 0):
         self.virtual = isVirtual
+        self.healthColored = healthColored
+        Suit.Suit.isHealthColored = healthColored
         if self.virtual:
             actorNode = self.find('**/__Actor_modelRoot')
             actorCollection = actorNode.findAllMatches('*')
@@ -68,13 +73,16 @@ class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBa
             for thingIndex in xrange(0, actorCollection.getNumPaths()):
                 thing = actorCollection[thingIndex]
                 if thing.getName() not in ('joint_attachMeter', 'joint_nameTag', 'def_nameTag'):
-                    thing.setColorScale(1.0, 0.0, 0.0, 1.0)
+                    if self.healthColored:
+                        thing.setColorScale(0.0, 1.0, 0.0, 1.0)
+                    else:
+                        thing.setColorScale(1.0, 0.0, 0.0, 1.0)
                     thing.setAttrib(ColorBlendAttrib.make(ColorBlendAttrib.MAdd))
                     thing.setDepthWrite(False)
                     thing.setBin('fixed', 1)
 
     def getVirtual(self):
-        return self.virtual
+        return [self.virtual, self.healthColored]
 
     def setSkeleRevives(self, num):
         if num == None:
@@ -130,6 +138,9 @@ class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBa
 
     def setDNA(self, dna):
         Suit.Suit.setDNA(self, dna)
+		
+    def updateHealthBar(self, hp, forceUpdate = 0):
+        Suit.Suit.updateHealthBar(self, hp, forceUpdate)
 
     def getHP(self):
         return self.currHP
@@ -142,6 +153,9 @@ class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBa
             self.currHP = self.maxHP
         else:
             self.currHP = hp
+
+    def setMaxHP(self, hp):
+        self.maxHP = hp
 
     def getDialogueArray(self, *args):
         return Suit.Suit.getDialogueArray(self, *args)

@@ -85,7 +85,7 @@ class DistributedLawbotBossSuit(DistributedSuitBase.DistributedSuitBase):
 
     def announceGenerate(self):
         DistributedSuitBase.DistributedSuitBase.announceGenerate(self)
-        if self.getVirtual():
+        if self.getVirtual()[0]:
             self.corpMedallion.hide()
             self.healthBar.show()
             self.updateHealthBar(0, 1)
@@ -140,11 +140,8 @@ class DistributedLawbotBossSuit(DistributedSuitBase.DistributedSuitBase):
         suitTrack.start()
 		
     def hitVirtualCog(self, hp):
-        currHP = getattr(self, 'currHP', 0)
-        if currHP > hp:
-            self.showHpText(hp - currHP)
-        DistributedSuitBase.DistributedSuitBase.setHP(self, hp)
-        self.updateHealthBar(0, 1)
+        self.showHpText(-hp)
+        DistributedSuitBase.DistributedSuitBase.updateHealthBar(self, self.getHP()-hp, 1)
 
     def __handleToonCollision(self, collEntry):
         toonId = base.localAvatar.getDoId()
