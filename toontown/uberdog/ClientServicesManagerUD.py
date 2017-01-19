@@ -202,7 +202,7 @@ class LocalAccountDB(AccountDB):
                 'success': True,
                 'userId': cookie,
                 'accountId': int(self.dbm[str(cookie)]),
-                'accessLevel': 507
+                'accessLevel': int(response['powerlevel'])
             }
             
             callback(response)
