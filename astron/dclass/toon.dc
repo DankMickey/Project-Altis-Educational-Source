@@ -1246,6 +1246,7 @@ dclass DistributedSuitBase : DistributedObject {
   setWaiter(uint8) broadcast ram;
   setSkelecog(uint8) required broadcast ram;
   setSkeleRevives(uint8) required broadcast ram;
+  setVirtual(uint8) required broadcast ram;
   setHP(int16) required broadcast ram;
 };
 
@@ -3156,10 +3157,12 @@ dclass DistributedLawbotBoss : DistributedBossCog {
 
 dclass DistributedLawbotBossSuit : DistributedSuitBase {
   setPosHpr(int16/10, int16/10, int16/10, int16/10, int16/10, int16/10) required broadcast ram;
+  teleportToToon(int16/10, int16/10, int16/10, int16/10, int16/10, int16/10, uint32) broadcast;
   doAttack(int16/10, int16/10, int16/10, int16/10, int16/10, int16/10) broadcast;
   doProsecute() broadcast;
   hitByToon() airecv clsend;
   doStun() broadcast;
+  hitVirtualCog(int16) broadcast;
 };
 
 dclass DistributedLawbotBossGavel : DistributedObject {

@@ -783,10 +783,17 @@ class DistributedLawbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM
          'le',
          'bw']
         for i in xrange(self.numLawyers):
-            suit = DistributedLawbotBossSuitAI.DistributedLawbotBossSuitAI(self.air, None)
+            if i > 7:
+                suit = DistributedLawbotBossSuitAI.DistributedLawbotBossSuitAI(self.air, None, virtual=True)
+            else:			
+                suit = DistributedLawbotBossSuitAI.DistributedLawbotBossSuitAI(self.air, None)
             suit.dna = SuitDNA.SuitDNA()
             lawCog = random.choice(lawCogChoices)
-            suit.dna.newSuit(lawCog)
+            if suit.getVirtual():
+                suit.dna.newSuit('bw')
+                suit.setLevel(8)
+            else:
+                suit.dna.newSuit(lawCog)
             suit.setPosHpr(*ToontownGlobals.LawbotBossLawyerPosHprs[i])
             suit.setBoss(self)
             suit.generateWithRequired(self.zoneId)
@@ -828,7 +835,7 @@ class DistributedLawbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM
 
     def areAllLawyersStunned(self):
         for lawyer in self.lawyers:
-            if not lawyer.stunned:
+            if not lawyer.stunned and not lawyer.getVirtual():
                 return False
 
         return True

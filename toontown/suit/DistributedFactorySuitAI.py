@@ -100,9 +100,3 @@ class DistributedFactorySuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
 
     def isForeman(self):
         return self.boss
-
-    def setVirtual(self, isVirtual = 1):
-        self.virtual = isVirtual
-
-    def getVirtual(self):
-        return self.virtual

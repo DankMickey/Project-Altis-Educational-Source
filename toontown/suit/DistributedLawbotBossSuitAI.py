@@ -11,9 +11,10 @@ from direct.fsm import State
 class DistributedLawbotBossSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedLawbotBossSuitAI')
 
-    def __init__(self, air, suitPlanner):
+    def __init__(self, air, suitPlanner, virtual=False):
         DistributedSuitBaseAI.DistributedSuitBaseAI.__init__(self, air, suitPlanner)
         self.stunned = False
+        self.virtual = virtual
         self.timeToRelease = 3.15
         self.timeProsecuteStarted = 0
         self.fsm = ClassicFSM.ClassicFSM('DistributedLawbotBossSuitAI', [State.State('Off', self.enterOff, self.exitOff, ['neutral']),
@@ -41,6 +42,12 @@ class DistributedLawbotBossSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
         taskMgr.remove(taskName)
         self.fsm = None
         return
+		
+    def generate(self):
+        DistributedSuitBaseAI.DistributedSuitBaseAI.generate(self)
+        if self.virtual:
+            self.sendUpdate('setSkelecog', [1])
+            self.sendUpdate('setVirtual', [1])
 
     def requestBattle(self, x, y, z, h, p, r):
         toonId = self.air.getAvatarIdFromSender()
@@ -88,15 +95,19 @@ class DistributedLawbotBossSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
                 self.doProsecute()
                 return
             toonPos = toon.getPos()
+            toonHpr = toon.getHpr()
             z2 = toonPos[2] + 1.3
             toonPos = Point3(toonPos.getX(), toonPos.getY(), 0)
-            lawyerPos = self.getPos()
-            lawyerPos = Point3(self.getPos().getX(), self.getPos().getY(), 0)
-            dirVector = toonPos - lawyerPos
-            dirVector.normalize()
-            dirVector *= 200
-            destPos = Point3(lawyerPos[0] + dirVector[0], lawyerPos[1] + dirVector[1], lawyerPos[2] + dirVector[2] + 1.3)
-            self.d_doAttack(lawyerPos[0], lawyerPos[1], lawyerPos[2], destPos[0], destPos[1], destPos[2])
+            if random.random() < 1 and self.getVirtual():
+                self.sendUpdate('teleportToToon', [toonPos[0], toonPos[1], toonPos[2], toonHpr[0], toonHpr[1], toonHpr[2], toonToAttackId])
+            else:
+                lawyerPos = self.getPos()
+                lawyerPos = Point3(self.getPos().getX(), self.getPos().getY(), 0)
+                dirVector = toonPos - lawyerPos
+                dirVector.normalize()
+                dirVector *= 200
+                destPos = Point3(lawyerPos[0] + dirVector[0], lawyerPos[1] + dirVector[1], lawyerPos[2] + dirVector[2] + 1.3)
+                self.d_doAttack(lawyerPos[0], lawyerPos[1], lawyerPos[2], destPos[0], destPos[1], destPos[2])
 
     def doProsecute(self):
         self.notify.debug('doProsecute')
@@ -134,7 +145,7 @@ class DistributedLawbotBossSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
 
     def hitByToon(self):
         self.notify.debug('I got hit by a toon')
-        if not self.stunned:
+        if not self.stunned and not self.getVirtual():
             curTime = globalClockDelta.getRealNetworkTime()
             deltaTime = curTime - self.timeProsecuteStarted
             deltaTime /= 100.0
@@ -148,6 +159,9 @@ class DistributedLawbotBossSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
             taskMgr.doMethodLater(ToontownGlobals.LawbotBossLawyerStunTime, self.unStun, taskName)
             if self.boss:
                 self.boss.checkForBonusState()
+        if self.getVirtual():
+           self.b_setHP(self.getHP() - 20)
+           self.sendUpdate('hitVirtualCog', [self.getHP()])
 
     def setStun(self, val):
         self.stunned = val

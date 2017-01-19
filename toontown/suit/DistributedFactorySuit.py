@@ -411,20 +411,3 @@ class DistributedFactorySuit(DistributedSuitBase.DistributedSuitBase, DelayDelet
         self.lifter = None
         self.cTrav = None
         return
-
-    def setVirtual(self, isVirtual = 1):
-        self.virtual = isVirtual
-        if self.virtual:
-            actorNode = self.find('**/__Actor_modelRoot')
-            actorCollection = actorNode.findAllMatches('*')
-            parts = ()
-            for thingIndex in xrange(0, actorCollection.getNumPaths()):
-                thing = actorCollection[thingIndex]
-                if thing.getName() not in ('joint_attachMeter', 'joint_nameTag', 'def_nameTag'):
-                    thing.setColorScale(1.0, 0.0, 0.0, 1.0)
-                    thing.setAttrib(ColorBlendAttrib.make(ColorBlendAttrib.MAdd))
-                    thing.setDepthWrite(False)
-                    thing.setBin('fixed', 1)
-
-    def getVirtual(self):
-        return self.virtual

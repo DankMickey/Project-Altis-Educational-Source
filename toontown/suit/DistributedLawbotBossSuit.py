@@ -3,6 +3,7 @@ from direct.interval.IntervalGlobal import *
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from direct.directnotify import DirectNotifyGlobal
+from toontown.chat.ChatGlobals import *
 from toontown.suit import DistributedSuitBase
 from toontown.toonbase import ToontownGlobals
 from toontown.battle import MovieUtil
@@ -84,6 +85,10 @@ class DistributedLawbotBossSuit(DistributedSuitBase.DistributedSuitBase):
 
     def announceGenerate(self):
         DistributedSuitBase.DistributedSuitBase.announceGenerate(self)
+        if self.getVirtual():
+        self.corpMedallion.hide()
+        self.healthBar.show()
+        self.updateHealthBar(0, 1)
         self.notify.debug('DLBS.announceGenerate')
         colNode = self.find('**/distAvatarCollNode*')
         colNode.setTag('pieCode', str(ToontownGlobals.PieCodeLawyer))
@@ -120,6 +125,26 @@ class DistributedLawbotBossSuit(DistributedSuitBase.DistributedSuitBase):
          hpr[1],
          hpr[2]])
         return None
+		
+    def teleportToToon(self, x, y, z, h, p, r, toonId):
+        suitTrack = Sequence()
+        teleportSound = base.loadSfx('phase_11/audio/sfx/LB_camera_shutter_2.ogg')
+        toon = base.cr.doId2do.get(toonId)
+        origScale = self.getScale()
+        suitTrack.append(Func(self.setChatAbsolute, "%s, you're about to become a loophole." % toon.getName(), CFSpeech | CFTimeout))
+        suitTrack.append(Wait(3))
+        suitTrack.append(Parallel(SoundInterval(teleportSound, duration=1.2, startTime=0, volume=1), LerpScaleInterval(self, 0.5, (0.01, 0.01, 0.01))))
+        suitTrack.append(Wait(1))
+        suitTrack.append(Func(self.setPosHpr, x, y, z, h, p, r))
+        suitTrack.append(Parallel(SoundInterval(teleportSound, duration=1.2, startTime=0, volume=1), LerpScaleInterval(self, 0.5, origScale, (0.01, 0.01, 0.01))))
+        suitTrack.start()
+		
+    def hitVirtualCog(self, hp):
+        currHP = getattr(self, 'currHP', 0)
+        if currHP > hp:
+            self.showHpText(hp - currHP)
+        DistributedSuitBase.DistributedSuitBase.setHP(self, hp)
+        self.updateHealthBar(0, 1)
 
     def __handleToonCollision(self, collEntry):
         toonId = base.localAvatar.getDoId()
