@@ -86,9 +86,9 @@ class DistributedLawbotBossSuit(DistributedSuitBase.DistributedSuitBase):
     def announceGenerate(self):
         DistributedSuitBase.DistributedSuitBase.announceGenerate(self)
         if self.getVirtual():
-        self.corpMedallion.hide()
-        self.healthBar.show()
-        self.updateHealthBar(0, 1)
+            self.corpMedallion.hide()
+            self.healthBar.show()
+            self.updateHealthBar(0, 1)
         self.notify.debug('DLBS.announceGenerate')
         colNode = self.find('**/distAvatarCollNode*')
         colNode.setTag('pieCode', str(ToontownGlobals.PieCodeLawyer))
