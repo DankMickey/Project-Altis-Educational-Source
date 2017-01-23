@@ -21,13 +21,6 @@ ratioMissToHit = 1.5
 tPieShrink = 0.7
 pieFlyTaskName = 'MovieThrow-pieFly'
 
-def addHit(dict, suitId, hitCount):
-    if suitId in dict:
-        dict[suitId] += hitCount
-    else:
-        dict[suitId] = hitCount
-
-
 def doFires(fires):
     npcArrivals, npcDepartures, npcs = MovieNPCSOS.doNPCTeleports(fires)
     if len(fires) == 0:
@@ -35,11 +28,27 @@ def doFires(fires):
 
     suitFiresDict = {}
     for fire in fires:
-        suitId = fire['target']['suit'].doId
-        if suitId in suitFiresDict:
-            suitFiresDict[suitId].append(fire)
+        targets = fire['target']
+        if len(targets) == 1:
+            suitId = targets[0]['suit'].doId
+            if suitId in suitFiresDict:
+                suitFiresDict[suitId].append((fire, targets[0]))
+            else:
+                suitFiresDict[suitId] = [(fire, targets[0])]
         else:
-            suitFiresDict[suitId] = [fire]
+            for target in targets:
+                suitId = target['suit'].doId
+                if suitId in suitFiresDict:
+                    otherFires = suitFiresDict[suitId]
+                    alreadyInList = 0
+                    for oFire in otherFires:
+                        if oFire[0]['toon'] == fire['toon']:
+                            alreadyInList = 1
+
+                    if alreadyInList == 0:
+                        suitFiresDict[suitId].append((fire, target))
+                else:
+                    suitFiresDict[suitId] = [(fire, target)]
 
     suitFires = suitFiresDict.values()
     def compFunc(a, b):
@@ -49,24 +58,6 @@ def doFires(fires):
             return -1
         return 0
     suitFires.sort(compFunc)
-
-    totalHitDict = {}
-    singleHitDict = {}
-    groupHitDict = {}
-
-    for fire in fires:
-        suitId = fire['target']['suit'].doId
-        if 1:
-            if fire['target']['hp'] > 0:
-                addHit(singleHitDict, suitId, 1)
-                addHit(totalHitDict, suitId, 1)
-            else:
-                addHit(singleHitDict, suitId, 0)
-                addHit(totalHitDict, suitId, 0)
-
-    notify.debug('singleHitDict = %s' % singleHitDict)
-    notify.debug('groupHitDict = %s' % groupHitDict)
-    notify.debug('totalHitDict = %s' % totalHitDict)
 
     delay = 0.0
     mtrack = Parallel()
@@ -92,29 +83,27 @@ def __doSuitFires(fires):
     toonTracks = Parallel()
     delay = 0.0
     hitCount = 0
-    for fire in fires:
-        if fire['target']['hp'] > 0:
-            hitCount += 1
-        else:
-            break
-
     suitList = []
+    i = 0
     for fire in fires:
-        if fire['target']['suit'] not in suitList:
-            suitList.append(fire['target']['suit'])
+        if fire['target'][i]['suit'] not in suitList:
+            suitList.append(fire['target'][i]['suit'])
+        i+=1
 
+    i = 0
     for fire in fires:
         showSuitCannon = 1
-        if fire['target']['suit'] not in suitList:
+        if fire['target'][i]['suit'] not in suitList:
             showSuitCannon = 0
         else:
-            suitList.remove(fire['target']['suit'])
+            suitList.remove(fire['target'][i]['suit'])
         tracks = __throwPie(fire, delay, hitCount, showSuitCannon)
         if tracks:
             for track in tracks:
                 toonTracks.append(track)
 
         delay = delay + TOON_THROW_DELAY
+        i+=1
 
     return toonTracks
 

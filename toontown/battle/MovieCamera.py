@@ -985,7 +985,7 @@ def randomToonGroupShot(toons, suit, duration, battle):
     return focusShot(x, y, z, duration, focalPoint)
 
 
-def chooseFireShot(throws, suitThrowsDict, attackDuration):
+def chooseFireShot(throws, suitThrowsDict, attackDuration, enterDuration=0, exitDuration=0):
     enterShot = chooseNPCEnterShot(traps, enterDuration)
     openShot = chooseFireOpenShot(throws, suitThrowsDict, attackDuration)
     openDuration = openShot.getDuration()
