@@ -6,6 +6,7 @@ import json
 import time
 import random
 import urllib2
+import httplib
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectGlobalUD import DistributedObjectGlobalUD
 from direct.distributed.PyDatagram import *
@@ -20,7 +21,7 @@ from toontown.toonbase import TTLocalizer
 
 # Import from PyCrypto only if we are using a database that requires it. This
 # allows local hosted and developer builds of the game to run without it:
-accountDBType = simbase.config.GetString('accountdb-type', 'developer')
+accountDBType = simbase.config.GetString('accountdb-type', 'local')
 if accountDBType == 'remote':
     from Crypto.Cipher import AES
 
@@ -29,14 +30,12 @@ if accountDBType == 'remote':
 minAccessLevel = simbase.config.GetInt('min-access-level', 100)
 
 accountServerEndpoint = simbase.config.GetString(
-    'account-server-endpoint', 'https://toontowninfinite.com/api/')
+    'account-server-endpoint', 'https://projectaltis.com/api/')
 accountServerSecret = simbase.config.GetString(
     'account-server-secret', '6163636f756e7473')
 
-
 http = HTTPClient()
 http.setVerifySsl(0)
-
 
 def executeHttpRequest(url, **extras):
     timestamp = str(int(time.time()))
@@ -138,27 +137,90 @@ class LocalAccountDB(AccountDB):
     notify = directNotify.newCategory('LocalAccountDB')
 
     def lookup(self, username, callback):
-        # Let's check if this user's ID is in your account database bridge:
-        if str(username) not in self.dbm:
+        httpReq = httplib.HTTPConnection('www.projectaltis.com')
+        httpReq.request('GET', '/api/validatetoken?t=%s' % (username))
+        
+        try:
+            XXX = httpReq.getresponse().read()
+            response = json.loads(XXX)
+        except:
+            callback({'success': False,
+                      'reason': 'Account Server Overloaded. Please Try Again Later!'})
+            return
 
+        if response['status'] != 'true':
+            
+            callback({'success': False,
+                      'reason': 'Account Server Overloaded. Please Try Again Later!'})
+            return
+        else:
+            cookie = response['additional']
+
+        if len(cookie) != 64: # Cookies should be exactly 64 Characters long!
+            callback({'success': False,
+                      'reason': 'Invalid Cookie Specified!'})
+            return
+
+        sanityChecks = httplib.HTTPConnection('www.projectaltis.com')
+        sanityChecks.request('GET', '/api/sanitycheck/%s' % (cookie))
+        
+        try:
+            XYZ = sanityChecks.getresponse().read()
+            print(str(XYZ))
+            response = json.loads(XYZ)
+        except:
+            print("KILL ME")
+            callback({'success': False,
+                      'reason': 'Account Server Overloaded. Please Try Again Later!'})
+            return
+        try:
+            if response["isbanned"] == "true":
+                callback({'success': False,
+                          'reason': 'Your account is banned from Project Altis!'})
+                return
+        except: 
+            pass
+                
+        #if response["statuscheck"] == "false":
+        #    callback({'success': False,
+        #              'reason': 'Toontown Project Altis is closed until the 20th!'})
+        #    return
+
+        if len(cookie) != 64: # Cookies should be exactly 64 Characters long!
+            callback({'success': False,
+                      'reason': 'Invalid Cookie Specified!'})
+            return
+        # Let's check if this user's ID is in your account database bridge:
+        if str(cookie) not in self.dbm:
             # Nope. Let's associate them with a brand new Account object!
             response = {
                 'success': True,
-                'userId': username,
+                'userId': cookie,
                 'accountId': 0,
-                'accessLevel': max((700 if not self.dbm else 100), minAccessLevel)
+                'accessLevel': 100
             }
+            
             callback(response)
             return response
 
         else:
-
-            # We have an account already, let's return what we've got:
-            response = {
-                'success': True,
-                'userId': username,
-                'accountId': int(self.dbm[str(username)])
-            }
+            try:
+                # We have an account already, let's return what we've got:
+                response = {
+                    'success': True,
+                    'userId': cookie,
+                    'accountId': int(self.dbm[str(cookie)]),
+                    'accessLevel': int(response['powerlevel'])
+                }
+            except:
+                # We have an account already, let's return what we've got:
+                response = {
+                    'success': True,
+                    'userId': cookie,
+                    'accountId': int(self.dbm[str(cookie)]),
+                    'accessLevel': int(150)
+                }
+            
             callback(response)
             return response
 
@@ -407,13 +469,26 @@ class LoginAccountFSM(OperationFSM):
         datagram.addChannel(self.csm.GetAccountConnectionChannel(self.accountId))
         self.csm.air.send(datagram)
 
-        # Add this connection to extra channels which may be useful:
-        if self.accessLevel > 100:
-            datagram = PyDatagram()
-            datagram.addServerHeader(self.target, self.csm.air.ourChannel,
-                                     CLIENTAGENT_OPEN_CHANNEL)
-            datagram.addChannel(OtpDoGlobals.OTP_STAFF_CHANNEL)
-            self.csm.air.send(datagram)
+        # Subscribe to any "staff" channels that the account has access to.
+        access = self.account.get('ADMIN_ACCESS', 0)
+        if access >= 200:
+            # Subscribe to the moderator channel.
+            dg = PyDatagram()
+            dg.addServerHeader(self.target, self.csm.air.ourChannel, CLIENTAGENT_OPEN_CHANNEL)
+            dg.addChannel(OtpDoGlobals.OTP_MOD_CHANNEL)
+            self.csm.air.send(dg)
+        if access >= 400:
+            # Subscribe to the administrator channel.
+            dg = PyDatagram()
+            dg.addServerHeader(self.target, self.csm.air.ourChannel, CLIENTAGENT_OPEN_CHANNEL)
+            dg.addChannel(OtpDoGlobals.OTP_ADMIN_CHANNEL)
+            self.csm.air.send(dg)
+        if access >= 500:
+            # Subscribe to the system administrator channel.
+            dg = PyDatagram()
+            dg.addServerHeader(self.target, self.csm.air.ourChannel, CLIENTAGENT_OPEN_CHANNEL)
+            dg.addChannel(OtpDoGlobals.OTP_SYSADMIN_CHANNEL)
+            self.csm.air.send(dg)
 
         # Now set their sender channel to represent their account affiliation:
         datagram = PyDatagram()
@@ -527,7 +602,7 @@ class CreateAvatarFSM(OperationFSM):
                     hp = 15
                 else:
                     hp = 25
-                experience = [400, 600]
+                experience = [600, 800]
                 
             elif self.pg == 2: 
                 maxMoney = 60
@@ -542,7 +617,7 @@ class CreateAvatarFSM(OperationFSM):
                     hp = 25
                 else:
                     hp = 34
-                experience = [600, 1600]
+                experience = [1000, 2400]
 			
             exp = Experience()
             
@@ -947,10 +1022,7 @@ class LoadAvatarFSM(AvatarOperationFSM):
     def enterSetAvatarTask(self, channel, task):
         # Finally, grant ownership and shut down.
         datagram = PyDatagram()
-        datagram.addServerHeader(
-            self.avId,
-            self.csm.air.ourChannel,
-            STATESERVER_OBJECT_SET_OWNER)
+        datagram.addServerHeader(self.avId, self.csm.air.ourChannel, STATESERVER_OBJECT_SET_OWNER)
         datagram.addChannel(self.target<<32 | self.avId)
         self.csm.air.send(datagram)
 
@@ -967,47 +1039,32 @@ class LoadAvatarFSM(AvatarOperationFSM):
         # First, give them a POSTREMOVE to unload the avatar, just in case they
         # disconnect while we're working.
         datagramCleanup = PyDatagram()
-        datagramCleanup.addServerHeader(
-            self.avId,
-            channel,
-            STATESERVER_OBJECT_DELETE_RAM)
+        datagramCleanup.addServerHeader(self.avId, channel, STATESERVER_OBJECT_DELETE_RAM)
         datagramCleanup.addUint32(self.avId)
         datagram = PyDatagram()
-        datagram.addServerHeader(
-            channel,
-            self.csm.air.ourChannel,
-            CLIENTAGENT_ADD_POST_REMOVE)
+        datagram.addServerHeader( channel, self.csm.air.ourChannel, CLIENTAGENT_ADD_POST_REMOVE)
         datagram.addString(datagramCleanup.getMessage())
         self.csm.air.send(datagram)
 
         # Activate the avatar on the DBSS:
-        self.csm.air.sendActivate(
-            self.avId, 0, 0, self.csm.air.dclassesByName['DistributedToonUD'],
-            {'setAdminAccess': [self.account.get('ACCESS_LEVEL', 100)],
-             'setBankMoney': [self.account.get('MONEY', 0)]})
+        self.csm.air.sendActivate(self.avId, 0, 0, self.csm.air.dclassesByName['DistributedToonUD'], {'setAdminAccess': \
+            [self.account.get('ACCESS_LEVEL', 100)]})
 
         # Next, add them to the avatar channel:
         datagram = PyDatagram()
-        datagram.addServerHeader(
-            channel,
-            self.csm.air.ourChannel,
-            CLIENTAGENT_OPEN_CHANNEL)
+        datagram.addServerHeader(channel, self.csm.air.ourChannel, CLIENTAGENT_OPEN_CHANNEL)
         datagram.addChannel(self.csm.GetPuppetConnectionChannel(self.avId))
         self.csm.air.send(datagram)
 
         # Now set their sender channel to represent their account affiliation:
         datagram = PyDatagram()
-        datagram.addServerHeader(
-            channel,
-            self.csm.air.ourChannel,
-            CLIENTAGENT_SET_CLIENT_ID)
+        datagram.addServerHeader( channel, self.csm.air.ourChannel, CLIENTAGENT_SET_CLIENT_ID)
         datagram.addChannel(self.target<<32 | self.avId)
         self.csm.air.send(datagram)
 
         # Eliminate race conditions.
-        taskMgr.doMethodLater(0.2, self.enterSetAvatarTask,
-                              'avatarTask-%s' % self.avId, extraArgs=[channel],
-                              appendTask=True)
+        taskMgr.doMethodLater(0.2, self.enterSetAvatarTask, 'avatarTask-%s' % (self.avId), extraArgs=[channel],
+            appendTask=True)
 
 class UnloadAvatarFSM(OperationFSM):
     notify = directNotify.newCategory('UnloadAvatarFSM')
@@ -1025,36 +1082,24 @@ class UnloadAvatarFSM(OperationFSM):
 
         # Clear off POSTREMOVE:
         datagram = PyDatagram()
-        datagram.addServerHeader(
-            channel,
-            self.csm.air.ourChannel,
-            CLIENTAGENT_CLEAR_POST_REMOVES)
+        datagram.addServerHeader(channel, self.csm.air.ourChannel, CLIENTAGENT_CLEAR_POST_REMOVES)
         self.csm.air.send(datagram)
 
         # Remove avatar channel:
         datagram = PyDatagram()
-        datagram.addServerHeader(
-            channel,
-            self.csm.air.ourChannel,
-            CLIENTAGENT_CLOSE_CHANNEL)
+        datagram.addServerHeader(channel, self.csm.air.ourChannel, CLIENTAGENT_CLOSE_CHANNEL)
         datagram.addChannel(self.csm.GetPuppetConnectionChannel(self.avId))
         self.csm.air.send(datagram)
 
         # Reset sender channel:
         datagram = PyDatagram()
-        datagram.addServerHeader(
-            channel,
-            self.csm.air.ourChannel,
-            CLIENTAGENT_SET_CLIENT_ID)
+        datagram.addServerHeader(channel, self.csm.air.ourChannel, CLIENTAGENT_SET_CLIENT_ID)
         datagram.addChannel(self.target<<32)
         self.csm.air.send(datagram)
 
         # Unload avatar object:
         datagram = PyDatagram()
-        datagram.addServerHeader(
-            self.avId,
-            channel,
-            STATESERVER_OBJECT_DELETE_RAM)
+        datagram.addServerHeader(self.avId, channel, STATESERVER_OBJECT_DELETE_RAM)
         datagram.addUint32(self.avId)
         self.csm.air.send(datagram)
 
@@ -1062,10 +1107,17 @@ class UnloadAvatarFSM(OperationFSM):
         self.csm.air.writeServerEvent('avatarUnload', self.avId)
         self.demand('Off')
 
-
-# --- CLIENT SERVICES MANAGER UBERDOG ---
 class ClientServicesManagerUD(DistributedObjectGlobalUD):
     notify = directNotify.newCategory('ClientServicesManagerUD')
+
+    def __init__(self, air):
+        DistributedObjectGlobalUD.__init__(self, air)
+
+        # For processing name patterns.
+        self.nameGenerator = NameGenerator()
+
+        # Temporary HMAC key:
+        self.key = '209dTOvFoRB0QRbfeSjcyxo9iJamfKSh43ZJabBS'
 
     def announceGenerate(self):
         DistributedObjectGlobalUD.announceGenerate(self)
@@ -1076,12 +1128,6 @@ class ClientServicesManagerUD(DistributedObjectGlobalUD):
         # of race conditions.
         self.connection2fsm = {}
         self.account2fsm = {}
-
-        # For processing name patterns.
-        self.nameGenerator = NameGenerator()
-
-        # Temporary HMAC key:
-        self.key = '209dTOvFoRB0QRbfeSjcyxo9iJamfKSh43ZJabBS'
 
         # Instantiate our account DB interface:
         if accountDBType == 'developer':
@@ -1095,10 +1141,7 @@ class ClientServicesManagerUD(DistributedObjectGlobalUD):
 
     def killConnection(self, connId, reason):
         datagram = PyDatagram()
-        datagram.addServerHeader(
-            connId,
-            self.air.ourChannel,
-            CLIENTAGENT_EJECT)
+        datagram.addServerHeader(connId, self.air.ourChannel, CLIENTAGENT_EJECT)
         datagram.addUint16(122)
         datagram.addString(reason)
         self.air.send(datagram)
@@ -1110,7 +1153,7 @@ class ClientServicesManagerUD(DistributedObjectGlobalUD):
             self.notify.warning('Tried to kill connection %d for duplicate FSM, but none exists!' % connId)
             return
 
-        self.killConnection(connId, 'An operation is already underway: ' + fsm.name)
+        self.killConnection(connId, 'An operation is already underway')
 
     def killAccount(self, accountId, reason):
         self.killConnection(self.GetAccountConnectionChannel(accountId), reason)
@@ -1118,11 +1161,10 @@ class ClientServicesManagerUD(DistributedObjectGlobalUD):
     def killAccountFSM(self, accountId):
         fsm = self.account2fsm.get(accountId)
         if not fsm:
-
-            self.notify.warning('Tried to kill account %d for duplicate FSM, but none exists!' % accountId)
+            self.notify.warning('Tried to kill account %d for duplicate FSM, but none exists!' % (accountId))
             return
 
-        self.killAccount(accountId, 'An operation is already underway: ' + fsm.name)
+        self.killAccount(accountId, 'An operation is already underway')
 
     def runAccountFSM(self, fsmtype, *args):
         sender = self.air.getAccountIdFromSender()
@@ -1145,11 +1187,10 @@ class ClientServicesManagerUD(DistributedObjectGlobalUD):
         # Time to check this login to see if its authentic
         digest_maker = hmac.new(self.key)
         digest_maker.update(cookie)
-        serverKey = digest_maker.hexdigest()
         
-        if not hmac.compare_digest(serverKey, authKey):
+        if not hmac.compare_digest(digest_maker.hexdigest(), authKey):
             # recieved a bad authentication key from the client, drop there connection!
-            self.killConnection(sender, 'Failed to login, recieved a bad login token %s' % (cookie))
+            self.killConnection(sender, 'Failed to login, recieved a bad login cookie %s!' % (cookie))
             return
 
         if sender >> 32:
@@ -1177,8 +1218,7 @@ class ClientServicesManagerUD(DistributedObjectGlobalUD):
         self.runAccountFSM(SetNameTypedFSM, avId, name)
 
     def setNamePattern(self, avId, p1, f1, p2, f2, p3, f3, p4, f4):
-        self.runAccountFSM(SetNamePatternFSM, avId, [(p1, f1), (p2, f2),
-                                                     (p3, f3), (p4, f4)])
+        self.runAccountFSM(SetNamePatternFSM, avId, [(p1, f1), (p2, f2), (p3, f3), (p4, f4)])
 
     def acknowledgeAvatarName(self, avId):
         self.runAccountFSM(AcknowledgeNameFSM, avId)

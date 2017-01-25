@@ -287,8 +287,8 @@ dclass OtpAvatarManager : DistributedObject {
 
 dclass ChatAgent : DistributedObject {
   adminChat(uint32, string);
-  chatMessage(string(0-256)) clsend;
-  chatMessageResponse(DoId, string, TalkModification []) airecv;
+  chatMessage(string(0-256), uint8 chatMode) clsend;
+  chatMessageResponse(DoId, string, TalkModification [], uint8 chatMode) airecv;
 };
 
 dclass FriendManager : DistributedObject {
@@ -809,7 +809,7 @@ from toontown.cogdominium import DistCogdoCraneMoneyBag/AI
 from toontown.cogdominium import DistCogdoCraneCog/AI
 from toontown.parties.GlobalPartyManager/AI/UD import GlobalPartyManager/AI/UD
 from toontown.weather import DistributedWeatherCycle/AI
-from toontown.weather import DistributedWeatherStorm/A
+from toontown.weather import DistributedWeatherStorm/AI
 from toontown.club import DistributedToonClub/AI
 
 struct GiftItem {
@@ -948,7 +948,7 @@ dclass DistributedToon : DistributedPlayer {
   setMoney(int16 = 0) required ownrecv db;
   setMaxBankMoney(int16 maxMoney = 15000) required broadcast ownrecv db;
   setMaxMoney(int16 maxMoney = 40) required broadcast ownrecv db;
-  setBankMoney(int32 = 0) required ownrecv;
+  setBankMoney(int16 money = 0) required ownrecv db;
   setMaxHp(int16 = 15) required broadcast ownrecv db;
   setHp(int16 = 15) required broadcast ownrecv db;
   setUber(int16) required broadcast ownrecv db;
@@ -1972,6 +1972,9 @@ dclass NewsManager : DistributedObject {
   setTrolleyHolidayEnd() broadcast;
   setTrolleyWeekendStart() broadcast;
   setTrolleyWeekendEnd() broadcast;
+  setMoreXpHolidayStart() broadcast;
+  setMoreXpHolidayOngoing() broadcast;
+  setMoreXpHolidayEnd() broadcast;
   setRoamingTrialerWeekendStart() broadcast;
   setRoamingTrialerWeekendEnd() broadcast;
   setInvasionStatus(uint8, string, uint32, uint8) broadcast;
@@ -2629,8 +2632,8 @@ dclass DistributedFurnitureItem : DistributedSmoothNode {
 dclass DistributedBank : DistributedFurnitureItem {
   avatarEnter() airecv clsend;
   freeAvatar();
-  setMovie(uint8, uint32, int16) broadcast ram;
-  transferMoney(int16) airecv clsend;
+  setMovie(uint8 mode, uint32 avId, int16 timestamp) broadcast ram;
+  transferMoney(int16 amount) airecv clsend;
 };
 
 dclass DistributedCloset : DistributedFurnitureItem {
@@ -3913,7 +3916,7 @@ dclass CharityScreen : DistributedObject {
 };
 
 dclass DistributedWeatherCycle : DistributedObject {
-  setState(string) broadcast ram;
+  setState(string) required broadcast ram;
   setDuration(int32) required broadcast ram;
 };
 
@@ -3930,9 +3933,7 @@ struct Member {
 
 dclass DistributedToonClub : DistributedObjectGlobal {
   requestStats() clsend;
-  
   addMember(uint32) clsend;
   removeMember(uint32);
-
   setMembers(Member []);
 };

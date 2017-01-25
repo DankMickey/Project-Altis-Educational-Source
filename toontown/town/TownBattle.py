@@ -3,19 +3,19 @@ import types
 from direct.fsm import StateData
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
-import TownBattleAttackPanel
-import TownBattleWaitPanel
-import TownBattleChooseAvatarPanel
-import TownBattleSOSPanel
-import TownBattleSOSPetSearchPanel
-import TownBattleSOSPetInfoPanel
-import TownBattleToonPanel
-import TownBattleCogPanel
+from toontown.town import TownBattleAttackPanel
+from toontown.town import TownBattleWaitPanel
+from toontown.town import TownBattleChooseAvatarPanel
+from toontown.town import TownBattleSOSPanel
+from toontown.town import TownBattleSOSPetSearchPanel
+from toontown.town import TownBattleSOSPetInfoPanel
+from toontown.town import TownBattleToonPanel
+from toontown.town import TownBattleCogPanel
 from toontown.toontowngui import TTDialog
 from direct.directnotify import DirectNotifyGlobal
 from toontown.battle import BattleBase
 from toontown.toonbase import ToontownTimer
-from direct.showbase import PythonUtil
+from toontown.toonbase import ToonPythonUtil as PythonUtil
 from toontown.toonbase import TTLocalizer
 from toontown.pets import PetConstants
 from direct.gui.DirectGui import DGG
@@ -206,17 +206,17 @@ class TownBattle(StateData.StateData):
             self.cogPanels[0].setX(self.oddPos[1])
             self.cogPanels[0].show()
         elif num == 2:
-            for i in xrange(2):
+            for i in range(2):
                 self.cogPanels[i].setX(self.evenPos[i + 1])
                 self.cogPanels[i].show()
 
         elif num == 3:
-            for i in xrange(3):
+            for i in range(3):
                 self.cogPanels[i].setX(self.oddPos[i])
                 self.cogPanels[i].show()
 
         elif num == 4:
-            for i in xrange(4):
+            for i in range(4):
                 self.cogPanels[i].setX(self.evenPos[i])
                 self.cogPanels[i].show()
 
