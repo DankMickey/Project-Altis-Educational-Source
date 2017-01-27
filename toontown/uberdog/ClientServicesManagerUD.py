@@ -139,15 +139,15 @@ class LocalAccountDB(AccountDB):
 
     def addNameRequest(self, avId, name):
         # add type a name
-        nameCheck = httplib.HTTPConnection('www.projectaltis.com')
-        nameCheck.request('GET', '/api/441107756FCF9C3715A7E8EA84612924D288659243D5242BFC8C2E26FE2B0428/addtypeaname/%s/%s' % (avid, name))
-        return # return if error: false pls
+        #nameCheck = httplib.HTTPConnection('www.projectaltis.com')
+        #nameCheck.request('GET', '/api/441107756FCF9C3715A7E8EA84612924D288659243D5242BFC8C2E26FE2B0428/addtypeaname/%s/%s' % (avId, name))
+        return 'Success'
     
     def getNameStatus(self, avId):
         # check type a name
-        nameCheck = httplib.HTTPConnection('www.projectaltis.com')
-        nameCheck.request('GET', '/api/441107756FCF9C3715A7E8EA84612924D288659243D5242BFC8C2E26FE2B0428/checktypeaname/%s' % (avid)) # this should just use avid
-        return # return the status
+        #nameCheck = httplib.HTTPConnection('www.projectaltis.com')
+        #nameCheck.request('GET', '/api/441107756FCF9C3715A7E8EA84612924D288659243D5242BFC8C2E26FE2B0428/checktypeaname/%s' % (avId)) # this should just use avid
+        return 'APPROVED'
     
     def lookup(self, username, callback):
         httpReq = httplib.HTTPConnection('www.projectaltis.com')
@@ -593,7 +593,7 @@ class CreateAvatarFSM(OperationFSM):
         colorString = TTLocalizer.NumToColor[dna.headColor]
         animalType = TTLocalizer.AnimalToSpecies[dna.getAnimal()]
         name = ' '.join((colorString, animalType))
-		
+        
         toonFields = {
             'setName': (name,),
             'WishNameState': ('OPEN',),
@@ -602,7 +602,7 @@ class CreateAvatarFSM(OperationFSM):
             'setDISLid': (self.target,),
             'setUber': (self.uber,)
         }
-		
+        
         if self.pg > 0:
             if self.pg == 1:
                 maxMoney = 50
@@ -631,7 +631,7 @@ class CreateAvatarFSM(OperationFSM):
                 else:
                     hp = 34
                 experience = [1000, 2400]
-			
+            
             exp = Experience()
             
             for i, t in enumerate(self.trackAccess):
@@ -640,7 +640,7 @@ class CreateAvatarFSM(OperationFSM):
                     exp.setExp(i, chosenExp)
 
             toonFields['setExperience'] = (exp.makeNetString(),)
-			
+            
             toonFields['setMaxMoney'] = (maxMoney,)
             toonFields['setMaxCarry'] = (maxCarry,)
             toonFields['setTrackAccess'] = (self.trackAccess,)
@@ -653,7 +653,7 @@ class CreateAvatarFSM(OperationFSM):
             toonFields['setHp'] = (hp,)
             toonFields['setMaxHp'] = (hp,)
             toonFields['setTutorialAck'] = (1,)
-				
+                
         self.csm.air.dbInterface.createObject(
             self.csm.air.dbId,
             self.csm.air.dclassesByName['DistributedToonUD'],

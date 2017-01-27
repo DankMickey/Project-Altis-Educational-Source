@@ -63,6 +63,7 @@ Dank Mickey | Former Developer | Boardbot Development
 Josh Zimmer | Former developer | One of the founders
 Swag Foreman | Boardbot Models | Various parts of Cog Rooftops
 Aura | Pick-A-Toon Concept / Inspiration
+Sweetratt | Chestnut Park Models
 
 \1orangeText\1Special thanks to\2
 Toontown Infinite | Various Resources

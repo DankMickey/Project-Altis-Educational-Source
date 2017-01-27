@@ -435,10 +435,6 @@ class DistributedToon(DistributedPlayer.DistributedPlayer, Toon.Toon, Distribute
         except:
             self.defaultZone = ToontownGlobals.ToontownCentral
             return
-
-        if ZoneUtil.getCanonicalHoodId(zoneId) == ToontownGlobals.FunnyFarm:
-            self.defaultZone = ToontownGlobals.ToontownCentral
-            return
         
         if not base.cr.isPaid() or launcher and not launcher.getPhaseComplete(hoodPhase):
             self.defaultZone = ToontownGlobals.ToontownCentral
@@ -2833,3 +2829,7 @@ def disableGC():
 @magicWord(category=CATEGORY_CREATIVE)
 def soprano():
     spellbook.getInvoker().magicTeleportInitiate(4000, 4401)
+    
+@magicWord(category=CATEGORY_CREATIVE)
+def chestnut():
+    spellbook.getInvoker().magicTeleportInitiate(7000, 7000)
