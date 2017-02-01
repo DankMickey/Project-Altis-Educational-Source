@@ -3,33 +3,34 @@ from direct.distributed.DistributedObjectUD import DistributedObjectUD
 
 class DistributedDeliveryManagerUD(DistributedObjectUD):
     notify = DirectNotifyGlobal.directNotify.newCategory("DistributedDeliveryManagerUD")
+    
+    def announceGenerate(self):
+        DistributedObjectUD.announceGenerate(self)
+        self.toonDoId = 0
+        self.toonName = ''
 
-    def hello(self, todo0):
-        pass
-
-    def rejectHello(self, todo0):
-        pass
-
-    def helloResponse(self, todo0):
-        pass
-
-    def getName(self, todo0):
-        pass
-
-    def receiveRejectGetName(self, todo0):
-        pass
+    def receiveRejectGetName(self, string):
+        self.notify.warning(string)
+        self.resetToonInfo()
+        
+    def resetToonInfo(self):
+        self.toonDoId = 0
+        self.toonName = ''
 
     def receiveAcceptGetName(self, todo0):
         pass
 
-    def addName(self, todo0, todo1):
-        pass
-
-    def receiveRejectAddName(self, todo0):
-        pass
-
-    def receiveAcceptAddName(self, todo0):
-        pass
+    def addName(self, avId, name):
+        if not avId:
+            self.sendUpdate('receiveRejectAddName', [0])
+            return
+        if not name:
+            self.sendUpdate('receiveRejectAddName', [avId])
+            return
+        
+        #There has to be a better way to do this.
+        self.toonDoId = avId
+        self.toonName = name
 
     def addGift(self, todo0, todo1, todo2, todo3, todo4):
         pass
@@ -67,12 +68,5 @@ class DistributedDeliveryManagerUD(DistributedObjectUD):
     def giveBeanBonus(self, todo0, todo1):
         pass
 
-    def requestAck(self):
-        pass
-
-    def returnAck(self):
-        pass
-
     def givePartyRefund(self, todo0, todo1, todo2, todo3, todo4):
         pass
-
