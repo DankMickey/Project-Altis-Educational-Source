@@ -22,7 +22,6 @@ class DistributedPartyJukeboxActivityBase(DistributedPartyActivity):
         self.currentSongData = None
         self.localQueuedSongInfo = None
         self.localQueuedSongListItem = None
-        return
 
     def generateInit(self):
         self.gui = JukeboxGui(self.phaseToMusicData)
@@ -31,6 +30,7 @@ class DistributedPartyJukeboxActivityBase(DistributedPartyActivity):
         DistributedPartyActivity.load(self)
         self.jukebox = Actor('phase_13/models/parties/jukebox_model', {'dance': 'phase_13/models/parties/jukebox_dance'})
         self.jukebox.reparentTo(self.root)
+        self.jukebox.setBlend(frameBlend = True)
         self.jukebox.loop('dance', fromFrame=0, toFrame=48)
         self.collNode = CollisionNode(self.getCollisionName())
         self.collNode.setCollideMask(ToontownGlobals.CameraBitmask | ToontownGlobals.WallBitmask)
@@ -50,7 +50,6 @@ class DistributedPartyJukeboxActivityBase(DistributedPartyActivity):
         self.jukebox.delete()
         self.jukebox = None
         self.ignoreAll()
-        return
 
     def getCollisionName(self):
         return self.uniqueName('jukeboxCollision')
@@ -91,7 +90,6 @@ class DistributedPartyJukeboxActivityBase(DistributedPartyActivity):
         self.accept(JukeboxGui.ADD_SONG_CLICK_EVENT, self.__handleQueueSong)
         if self.isUserHost():
             self.accept(JukeboxGui.MOVE_TO_TOP_CLICK_EVENT, self.__handleMoveSongToTop)
-        return
 
     def __localToonWillExitTask(self, task):
         self.localToonExiting()
@@ -103,7 +101,6 @@ class DistributedPartyJukeboxActivityBase(DistributedPartyActivity):
         if self.currentSongData is not None:
             self.gui.setSongCurrentlyPlaying(self.currentSongData[0], self.currentSongData[1])
         self.d_queuedSongsRequest()
-        return
 
     def __deactivateGui(self):
         self.ignore(JukeboxGui.CLOSE_EVENT)
@@ -171,7 +168,7 @@ class DistributedPartyJukeboxActivityBase(DistributedPartyActivity):
             if self.__checkPartyValidity() and hasattr(base.cr.playGame.getPlace().loader, 'music') and base.cr.playGame.getPlace().loader.music:
                 base.cr.playGame.getPlace().loader.music.stop()
             self.music.setTime(0.0)
-            self.music.setLoopCount(getMusicRepeatTimes(length))
+            self.music.setLoopCount(1)
             self.music.play()
             self.currentSongData = (phase, filename)
 

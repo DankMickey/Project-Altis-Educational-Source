@@ -191,14 +191,12 @@ class ToonHood(Hood):
         messenger.send('enterSafeZone')
         DistributedAvatar.DistributedAvatar.HpTextEnabled = 0
         base.localAvatar.laffMeter.start()
-        base.cr.forbidCheesyEffects(1)
         self.acceptOnce(self.minigameDoneEvent, self.handleMinigameDone)
 
     def exitMinigame(self):
         messenger.send('exitSafeZone')
         DistributedAvatar.DistributedAvatar.HpTextEnabled = 1
         base.localAvatar.laffMeter.stop()
-        base.cr.forbidCheesyEffects(0)
         self.ignore(self.minigameDoneEvent)
         minigameState = self.fsm.getStateNamed('minigame')
         for childFSM in minigameState.getChildren():
@@ -213,11 +211,12 @@ class ToonHood(Hood):
     def startSky(self):
         if not self.sky.getTag('sky') == 'Regular':
             self.endSpookySky()
-        SkyUtil.startCloudSky(self)
+        #SkyUtil.startCloudSky(self)
 
     def startSpookySky(self):
         if hasattr(self, 'sky') and self.sky:
             self.stopSky()
+        
         self.sky = loader.loadModel(self.spookySkyFile)
         self.sky.setTag('sky', 'Halloween')
         self.sky.setScale(1.0)

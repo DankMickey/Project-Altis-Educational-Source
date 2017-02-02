@@ -9,7 +9,7 @@ from direct.directnotify import DirectNotifyGlobal
 from direct.task import Task
 from toontown.catalog import CatalogFurnitureItem
 from toontown.catalog import CatalogItemTypes
-from direct.showbase import PythonUtil
+from toontown.toonbase import ToonPythonUtil as PythonUtil
 from toontown.toontowngui import TTDialog
 from toontown.toonbase import TTLocalizer
 from otp.otpbase import OTPLocalizer
@@ -374,7 +374,6 @@ class ObjectManager(NodePath, DirectObject):
         self.createAtticPicker()
         self.initializeDistributedFurnitureItems(furnitureManager.dfitems)
         self.setCamPosIndex(DEFAULT_CAM_INDEX)
-        base.localAvatar.setGhostMode(1)
         taskMgr.remove('editModeTransition')
         self.orientCamH(base.localAvatar.getH(self.targetNodePath))
         self.accept('mouse1', self.moveObjectStart)

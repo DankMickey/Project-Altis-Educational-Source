@@ -50,8 +50,6 @@ from toontown.toon import NPCToons
 from toontown.toonbase import ToontownGlobals
 from toontown.tutorial.TutorialManagerAI import TutorialManagerAI
 from toontown.uberdog.DistributedPartyManagerAI import DistributedPartyManagerAI
-
-# Charity Screen
 from toontown.events.CharityScreenAI import CharityScreenAI
 
 class ToontownAIRepository(ToontownInternalRepository):
@@ -92,6 +90,7 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.wantHalloween = self.config.GetBool('want-halloween', False)
         self.wantChristmas = self.config.GetBool('want-christmas', False)
         self.cogSuitMessageSent = False
+        self.weatherCycleDuration = self.config.GetInt('weather-cycle-duration', 100)
 
     def createManagers(self):
         self.timeManager = TimeManagerAI(self)
@@ -136,8 +135,8 @@ class ToontownAIRepository(ToontownInternalRepository):
             self.catalogManager = CatalogManagerAI(self)
             self.catalogManager.generateWithRequired(2)
             self.popularItemManager = PopularItemManagerAI(self)
-            self.deliveryManager = self.generateGlobalObject(
-                OTP_DO_ID_TOONTOWN_DELIVERY_MANAGER, 'DistributedDeliveryManager')
+            self.deliveryManager = self.generateGlobalObject(OTP_DO_ID_TOONTOWN_DELIVERY_MANAGER, 'DistributedDeliveryManager')
+            self.mailManager = self.generateGlobalObject(OTP_DO_ID_TOONTOWN_MAIL_MANAGER, 'DistributedMailManager')
         
         if self.wantPets:
             self.petMgr = PetManagerAI(self)
@@ -145,8 +144,7 @@ class ToontownAIRepository(ToontownInternalRepository):
         if self.wantParties:
             self.partyManager = DistributedPartyManagerAI(self)
             self.partyManager.generateWithRequired(2)
-            self.globalPartyMgr = self.generateGlobalObject(
-                OTP_DO_ID_GLOBAL_PARTY_MANAGER, 'GlobalPartyManager')
+            self.globalPartyMgr = self.generateGlobalObject(OTP_DO_ID_GLOBAL_PARTY_MANAGER, 'GlobalPartyManager')
                 
         if self.wantCharityScreen:
             self.charityCounter = CharityScreenAI(self)
@@ -155,6 +153,7 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         self.codeRedemptionMgr = simbase.air.generateGlobalObject(OTP_DO_ID_TOONTOWN_CODE_REDEMPTION_MANAGER, 'TTCodeRedemptionMgr')
         self.chatAgent = simbase.air.generateGlobalObject(OTP_DO_ID_CHAT_MANAGER, 'ChatAgent')
+
         self.toonClubManager = simbase.air.generateGlobalObject(OTP_DO_ID_TOON_CLUB_MANAGER, 'DistributedToonClubManager')
 
     def createSafeZones(self):
@@ -206,8 +205,8 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         self.districtStats = ToontownDistrictStatsAI(self)
         self.districtStats.settoontownDistrictId(self.districtId)
-        self.districtStats.generateWithRequiredAndId(
-            self.allocateChannel(), self.getGameDoId(), 3)
+        self.districtStats.generateWithRequiredAndId(self.allocateChannel(), 
+            self.getGameDoId(), 3)
         
         self.notify.info('Created ToontownDistrictStats(%d)' % self.districtStats.doId)
 
@@ -245,6 +244,9 @@ class ToontownAIRepository(ToontownInternalRepository):
 
     def decrementPopulation(self):
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() - 1)
+
+    def setHour(self, hour):
+        pass # Todo: Hour on district page
 
     def allocateZone(self):
         return self.zoneAllocator.allocate()

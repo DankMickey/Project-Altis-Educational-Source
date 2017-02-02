@@ -425,8 +425,8 @@ class ShtikerBook(DirectFrame, StateData.StateData):
         self.ignore('arrow_left')
         self.ignore('arrow_right')
         if isinstance(self.pages[self.currPageIndex], NewsPage.NewsPage):
-            self.ignore('arrow_left')
             self.ignore('arrow_right')
+            self.ignore('arrow_left')
         else:
             self.accept('arrow_right', self.__pageChange, [1])
             self.accept('arrow_left', self.__pageChange, [-1])

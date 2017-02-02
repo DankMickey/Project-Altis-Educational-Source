@@ -2,12 +2,13 @@ daemon:
     name: Astron Cluster
 
 general:
-    eventlogger: 127.0.0.1:7198
+    eventlogger: 127.0.0.1:7197
     dc_files:
         - ../dclass/toon.dc
 
 messagedirector:
-    bind: 127.0.0.1:7100
+    bind: 127.0.0.1:7199
+    threaded: true
 
 uberdogs:
     - class: CentralLogger
@@ -45,6 +46,10 @@ uberdogs:
     - class: DistributedDeliveryManager
       id: 4683
       anonymous: false
+      
+    - class: DistributedMailManager
+      id: 4690
+      anonymous: false
 
     - class: TTCodeRedemptionMgr
       id: 4695
@@ -60,15 +65,16 @@ uberdogs:
 
 roles:
     - type: clientagent
-      bind: 0.0.0.0:7199
-      version: "TTPA-Alpha-1.2.0"
+      bind: 0.0.0.0:7198
+      version: "TTPA-Alpha-1.4.0"
       client:
        relocate: true
        add_interest: enabled
       channels:
         min: 1000000000
         max: 1000001000
-
+  
+        
     - type: stateserver
       control: 4002
 
@@ -78,8 +84,8 @@ roles:
         min: 100000000
         max: 399999999
       backend:
-        type: yaml
-        foldername: ../databases/astrondb
+        type: mongodb
+        server: mongodb://127.0.0.1/astrondb
 
     - type: dbss
       database: 4003
@@ -88,5 +94,5 @@ roles:
           max: 399999999
 
     - type: eventlogger
-      bind: 127.0.0.1:7198
+      bind: 127.0.0.1:7197
       output: ../logs/events-%y%m%d_%H%M%S.log

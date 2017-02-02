@@ -245,18 +245,19 @@ class Street(BattlePlace.BattlePlace):
         zoneId = requestStatus['zoneId']
         if avId != -1:
             if avId not in base.cr.doId2do:
-                teleportDebug(requestStatus, "couldn't find friend %s" % avId)
-                handle = base.cr.identifyFriend(avId)
-                requestStatus = {'how': 'teleportIn',
-                 'hoodId': hoodId,
-                 'zoneId': hoodId,
-                 'shardId': None,
-                 'loader': 'safeZoneLoader',
-                 'where': 'playground',
-                 'avId': avId}
-                self.fsm.request('final')
-                self.__teleportOutDone(requestStatus)
-        return
+                friend = base.cr.identifyAvatar(avId)
+                if friend is None:
+                    teleportDebug(requestStatus, "couldn't find friend %s" % avId)
+                    handle = base.cr.identifyFriend(avId)
+                    requestStatus = {'how': 'teleportIn',
+                     'hoodId': hoodId,
+                     'zoneId': hoodId,
+                     'shardId': None,
+                     'loader': 'safeZoneLoader',
+                     'where': 'playground',
+                     'avId': avId}
+                    self.fsm.request('final')
+                    self.__teleportOutDone(requestStatus)
 
     def exitTeleportIn(self):
         self.removeSetZoneCompleteCallback(self._ttfToken)
@@ -367,7 +368,6 @@ class Street(BattlePlace.BattlePlace):
         geom = base.cr.playGame.getPlace().loader.geom
         self.halloweenLights = geom.findAllMatches('**/*light*')
         self.halloweenLights += geom.findAllMatches('**/*lamp*')
-        self.halloweenLights += geom.findAllMatches('**/prop_snow_tree*')
         for light in self.halloweenLights:
             light.setColorScaleOff(1)
 

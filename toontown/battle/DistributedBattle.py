@@ -1,17 +1,15 @@
+import random
 from direct.directnotify import DirectNotifyGlobal
 from direct.interval.IntervalGlobal import *
 from pandac.PandaModules import *
-import random
-
-from BattleBase import *
-import DistributedBattleBase
-import SuitBattleGlobals
+from toontown.battle.BattleBase import *
+from toontown.battle import DistributedBattleBase
+from toontown.battle import SuitBattleGlobals
 from otp.avatar import Emote
 from toontown.chat.ChatGlobals import *
 from toontown.distributed import DelayDelete
 from toontown.nametag import NametagGlobals
 from toontown.toonbase import ToontownBattleGlobals
-
 
 class DistributedBattle(DistributedBattleBase.DistributedBattleBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedBattle')
@@ -48,15 +46,16 @@ class DistributedBattle(DistributedBattleBase.DistributedBattleBase):
                 self.acceptOnce(self.PlayGameSetPlaceEvent, self.calcInteractiveProp)
 
     def calcInteractiveProp(self):
-        if base.cr.playGame.hood:
-            loader = base.cr.playGame.hood.loader
-            if hasattr(loader, 'getInteractiveProp'):
-                self.interactiveProp = loader.getInteractiveProp(self.zoneId)
-                self.notify.debug('self.interactiveProp = %s' % self.interactiveProp)
-            else:
-                self.notify.warning('no loader.getInteractiveProp self.interactiveProp is None')
-        else:
-            self.notify.warning('no hood  self.interactiveProp is None')
+        if base.config.GetBool('want-anim-props', True):
+             if base.cr.playGame.hood and hasattr(base.cr.playGame.hood, 'loader'):
+                 loader = base.cr.playGame.hood.loader
+ 
+                 if hasattr(loader, 'getInteractiveProp'):
+                     prop = self.getInteractiveProp()
+                     self.interactiveProp = base.cr.playGame.hood.loader.getInteractiveProp(self.zoneId)
+                     if prop != self.interactiveProp:
+                         self.notify.warning("Conflicting Interactive Props Found!")
+                         return
 
     def setMembers(self, suits, suitsJoining, suitsPending, suitsActive, suitsLured, suitTraps, toons, toonsJoining, toonsPending, toonsActive, toonsRunning, timestamp):
         if self.battleCleanedUp():

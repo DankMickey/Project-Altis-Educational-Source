@@ -5,7 +5,7 @@ from direct.interval.MetaInterval import Sequence, Parallel
 from direct.interval.FunctionInterval import Func, Wait
 from direct.interval.SoundInterval import SoundInterval
 from direct.interval.LerpInterval import LerpScaleInterval, LerpFunc
-from direct.showbase.PythonUtil import bound as clamp
+from toontown.toonbase.ToonPythonUtil import bound as clamp
 from direct.task import Task
 from direct.fsm.FSM import FSM
 from pandac.PandaModules import CollisionTube, CollisionNode, CollisionSphere
@@ -323,7 +323,7 @@ class PartyCog(FSM):
         self.hpText.setBillboardPointEye()
         self.hpText.setBin('fixed', 100)
         self.hpText.setPos(self.root, 0, 0, self.height / 2)
-        seq = Sequence(self.hpText.posInterval(0.25, Point3(self.root.getX(render), self.root.getY(render), self.root.getZ(render) + self.height + 1.0), blendType='easeOut'), Wait(0.25), self.hpText.colorInterval(0.1, Vec4(r, g, b, 0)), Func(self.__hideHitScore))
+        seq = Sequence(self.hpText.posInterval(0.25, Point3(self.root.getX(render), self.root.getY(render), self.root.getZ(render) + self.height + 1.0), blendType='easeOut'), Wait(0.25), self.hpText.colorInterval(0.1, Vec4(r, g, b, 0)), Func(self.hideHitScore))
         seq.start()
 
     def hideHitScore(self):

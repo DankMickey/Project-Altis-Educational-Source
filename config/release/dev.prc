@@ -2,9 +2,9 @@
 model-path ../resources
 
 # Server:
-server-version TTPA-Alpha-1.2.0
+server-version TTPA-Alpha-1.4.0
 min-access-level 600
-accountdb-type developer
+accountdb-type local
 shard-low-pop 50
 shard-mid-pop 100
 
@@ -16,20 +16,23 @@ rpc-server-endpoint http://localhost:8080/
 dc-file astron/dclass/toon.dc
 
 # Core features:
-want-pets #t
+want-pets #f
 want-parties #t
-want-cogdominiums #t
+want-cogdominiums #f
 want-achievements #f
 
 # Chat:
-want-whitelist #f
+want-whitelist #t
 
 # Cashbot boss:
 want-resistance-toonup #t
 want-resistance-restock #t
-want-resistance-dance #t
 
 # Developer options:
-show-population #f
+show-population #t
+show-total-population #t
 force-skip-tutorial #t
-want-instant-parties #t
+want-instant-parties #f
+
+# Weather
+weather-cycle-duration 100

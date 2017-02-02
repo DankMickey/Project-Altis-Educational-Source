@@ -1,13 +1,14 @@
 # Window settings:
-window-title Project Altis
-win-origin -1 -1
+window-title Project Altis [ALPHA]
+win-origin -2 -2
 icon-filename phase_3/etc/icon.ico
 cursor-filename phase_3/etc/toonmono.cur
-show-frame-rate-meter #t
+show-frame-rate-meter #f
+
+# Debug
 default-directnotify-level info
-
 notify-level-DistributedNPCScientistAI info
-
+want-pstats #f
 
 # Audio:
 audio-library-name p3fmod_audio
@@ -29,15 +30,14 @@ smooth-lag 0.4
 smooth-max-future 0.4
 smooth-min-suggest-resync 15
 
+average-frame-rate-interval 60.0
+clock-frame-rate 60.0
+
 # Textures:
 texture-anisotropic-degree 16
 
 # Preferences:
 preferences-filename preferences.json
-
-# Content packs:
-content-packs-filepath contentpacks/
-content-packs-sort-filename sort.yaml
 
 # Backups:
 backups-filepath backups/
@@ -45,7 +45,7 @@ backups-extension .json
 
 # Server:
 server-timezone EST/EDT/-5
-server-port 7199
+server-port 7198
 account-bridge-filename astron/databases/account-bridge.db
 toon-club-bridge-filename astron/databases/toon-clubs.db
 
@@ -81,9 +81,12 @@ want-goofy-speedway #t
 want-outdoor-zone #t
 want-golf-zone #t
 
+# Weather system
+want-weather #f
+
 # Options Page
 change-display-settings #t
-change-display-api #t
+change-display-api #f
 
 # Safe zone settings:
 want-treasure-planners #t
@@ -110,7 +113,7 @@ want-travel-game #f
 want-game-tables #f
 
 # Cog Battles
-base-xp-multiplier 5.0
+base-xp-multiplier 3.0
 
 # Cog headquarters:
 want-cog-headquarters #t
@@ -122,7 +125,6 @@ want-bossbot-headquarters #t
 # Cashbot boss:
 want-resistance-toonup #f
 want-resistance-restock #f
-want-resistance-dance #f
 
 # Cog buildings:
 want-cogbuildings #t
@@ -131,6 +133,8 @@ want-cogbuildings #t
 show-total-population #f
 want-mat-all-tailors #t
 want-long-pattern-game #f
+show-population #t
+show-total-population #t
 
 # Animated Props
 zero-pause-mult 1.0
@@ -140,6 +144,7 @@ randomize-interactive-idles #t
 interactive-prop-random-idles #t
 interactive-prop-info #f
 props-buff-battles #t
+prop-and-organic-bonus-stack #f
 prop-idle-pause-time 0.0
 
 # Events
@@ -147,10 +152,12 @@ want-charity-screen #t
 
 # Developer options:
 want-dev #f
-want-pstats 0
+want-pstats #f
+want-directtools #f
+want-tk #f
 
 # Holidays
-#active-holidays 116, 63, 64, 65, 66, 128
+active-holidays 63, 64, 65, 66 #128, 116
 
 # Temporary:
 want-old-fireworks #t

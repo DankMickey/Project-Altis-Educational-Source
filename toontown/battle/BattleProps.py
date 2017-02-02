@@ -3,6 +3,7 @@ from direct.actor import Actor
 from direct.directnotify import DirectNotifyGlobal
 from otp.otpbase import OTPGlobals
 import random
+
 Props = ((5, 'partyBall', 'partyBall'),
  (5,
   'feather',
@@ -402,6 +403,7 @@ class PropPool:
                 animDict[name] = self.propStrings[name][1]
                 prop.loadAnims(animDict)
                 prop.setName(name)
+                prop.setBlend(frameBlend = True)
                 self.storeProp(name, prop)
                 if name in Variants:
                     self.makeVariant(name)
