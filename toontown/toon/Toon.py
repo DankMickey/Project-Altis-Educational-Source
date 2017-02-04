@@ -466,7 +466,7 @@ class Toon(Avatar.Avatar, ToonHead):
         self.choiceBeta = 3
         self.defaultColorScale = None
         self.jar = None
-        self.setBlend(frameBlend = True)
+        self.setBlend(frameBlend = base.wantSmoothAnims)
         self.setLODAnimation(base.lodMaxRange, base.lodMinRange, base.lodDelayFactor)
         self.setTag('pieCode', str(ToontownGlobals.PieCodeToon))
         self.setFont(ToontownGlobals.getToonFont())
@@ -606,7 +606,7 @@ class Toon(Avatar.Avatar, ToonHead):
             self.sendLogSuspiciousEvent('nakedToonDNA %s was requested' % newDNA.torso)
             newDNA.torso = newDNA.torso + 's'
         self.setDNA(newDNA)
-        self.setBlend(frameBlend = True)
+        self.setBlend(frameBlend = base.wantSmoothAnims)
         self.setLODAnimation(base.lodMaxRange, base.lodMinRange, base.lodDelayFactor)
 
     def setDNA(self, dna):
@@ -672,7 +672,7 @@ class Toon(Avatar.Avatar, ToonHead):
         self.rescaleToon()
         self.resetHeight()
         self.setupToonNodes()
-        self.setBlend(frameBlend = True)
+        self.setBlend(frameBlend = base.wantSmoothAnims)
         self.setLODAnimation(base.lodMaxRange, base.lodMinRange, base.lodDelayFactor)
 
     def setupToonNodes(self):
@@ -2279,6 +2279,8 @@ class Toon(Avatar.Avatar, ToonHead):
         else:
             invScale = 1.0 / scale
         track = Parallel()
+        if not self.legsParts:
+            return track
         for li in xrange(self.legsParts.getNumPaths()):
             legs = self.legsParts[li]
             torso = self.torsoParts[li]
@@ -2302,6 +2304,9 @@ class Toon(Avatar.Avatar, ToonHead):
             self.defaultColorScale = scale
         if scale == None:
             scale = VBase4(1, 1, 1, 1)
+        if not self.getGeomNode():
+            self.notify.warning("A error has occured when attempting to colorscale Toon!")
+            return
         node = self.getGeomNode()
         caps = self.getPieces(('torso', 'torso-bot-cap'))
         track = Sequence()
@@ -2373,12 +2378,18 @@ class Toon(Avatar.Avatar, ToonHead):
         return track
 		
     def __doWireFrame(self):
+        if not self.getGeomNode():
+            self.notify.warning("A error has occured when attempting to wireframe Toon!")
+            return
         node = self.getGeomNode()
         track = Sequence()
         track.append(Func(node.setRenderModeWireframe))
         return track
 		
     def __doUnWireFrame(self):
+        if not self.getGeomNode():
+            self.notify.warning("A error has occured when attempting to unwireframe Toon!")
+            return
         node = self.getGeomNode()
         track = Sequence()
         track.append(Func(node.setRenderModeFilled))
@@ -3841,6 +3852,9 @@ class Toon(Avatar.Avatar, ToonHead):
             self.defaultColorScale = scale
         if scale == None:
             scale = VBase4(1, 1, 1, 1)
+        if not self.getGeomNode():
+            self.notify.warning("A error has occured when attempting to ghostify Toon!")
+            return
         node = self.getGeomNode()
         caps = self.getPieces(('torso', 'torso-bot-cap'))
         track = Sequence()
@@ -3862,6 +3876,9 @@ class Toon(Avatar.Avatar, ToonHead):
         return track
 
     def restoreDefaultColorScale(self):
+        if not self.getGeomNode():
+            self.notify.warning("A error has occured when attempting to restore color to Toon!")
+            return
         node = self.getGeomNode()
         if node:
             if self.defaultColorScale:
@@ -3875,6 +3892,9 @@ class Toon(Avatar.Avatar, ToonHead):
                 node.clearTransparency()
 
     def __doToonColor(self, color, lerpTime):
+        if not self.getGeomNode():
+            self.notify.warning("A error has occured when attempting to color Toon!")
+            return
         node = self.getGeomNode()
         if color == None:
             return Func(node.clearColor)
@@ -3885,6 +3905,9 @@ class Toon(Avatar.Avatar, ToonHead):
     def __doPartsColorScale(self, scale, lerpTime):
         if scale == None:
             scale = VBase4(1, 1, 1, 1)
+        if not self.getGeomNode():
+            self.notify.warning("A error has occured when attempting to colorscale parts!")
+            return
         node = self.getGeomNode()
         pieces = self.getPieces(('torso', ('arms', 'neck')), ('legs', ('legs', 'feet')), ('head', '+GeomNode'))
         track = Sequence()
@@ -5155,8 +5178,11 @@ class Toon(Avatar.Avatar, ToonHead):
 
         def getVelocity(toon = self, relVel = relVel):
             return render.getRelativeVector(toon, relVel)
-
-        toss = Track((0, Sequence(Func(self.setPosHpr, x, y, z, h, 0, 0), Func(pie.reparentTo, self.rightHand), Func(pie.setPosHpr, 0, 0, 0, 0, 0, 0), Parallel(ActorInterval(self, 'throw', startFrame=48), animPie), Func(self.loop, 'neutral'))), (16.0 / 24.0, Func(pie.detachNode)))
+        partName = None
+        oldanim = self.playingAnim
+        if self.playingAnim != 'neutral':
+            partName = 'torso'
+        toss = Track((0, Sequence(Func(self.setPosHpr, x, y, z, h, 0, 0), Func(pie.reparentTo, self.rightHand), Func(pie.setPosHpr, 0, 0, 0, 0, 0, 0), Parallel(ActorInterval(self, 'throw', startFrame=48, partName=partName), animPie), Func(self.loop, oldanim))), (16.0 / 24.0, Func(pie.detachNode)))
         fly = Track((14.0 / 24.0, SoundInterval(sound, node=self)), (16.0 / 24.0, Sequence(Func(flyPie.reparentTo, render), Func(flyPie.setScale, self.pieScale), Func(flyPie.setPosHpr, self, 0.52, 0.97, 2.24, 89.42, -10.56, 87.94), beginFlyIval, ProjectileInterval(flyPie, startVel=getVelocity, duration=3), Func(flyPie.detachNode))))
         return (toss, fly, flyPie)
 
