@@ -8,7 +8,7 @@ from direct.fsm import ClassicFSM, State, FSM
 from direct.interval.IntervalGlobal import *
 from toontown.toonbase import ToontownGlobals
 from direct.task import Task
-from toontown.pets import PetLookerAI, PetChase, PetFlee, PetSphere, PetConstants, PetDNA, PetTraits, PetObserve, PetBrain, PetMood, PetActionFSM, PetBase, PetGoal, PetTricks
+from toontown.pets import PetLookerAI, PetCollider, PetChase, PetFlee, PetSphere, PetConstants, PetDNA, PetTraits, PetObserve, PetBrain, PetMood, PetActionFSM, PetBase, PetGoal, PetTricks
 from toontown.pets.PetMoverAI import PetMoverAI 
 from toontown.toon import DistributedToonAI
 from toontown.ai import ServerEventBuffer

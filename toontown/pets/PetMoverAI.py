@@ -98,7 +98,7 @@ class PetMoverAI(FSM, Mover):
         self.pet = pet
         self.fwdSpeed = 10.0
         self.rotSpeed = 360.0
-        self.dt = 0.0
+        self.dt = 0
         FSM.__init__(self, 'PetMoverAI-%d' % self.pet.doId)
         Mover.__init__(self, self.pet, self.fwdSpeed, self.rotSpeed)
         self.chaseTarget = None
@@ -162,6 +162,8 @@ class PetMoverAI(FSM, Mover):
         
     def addRotShove(self, rotVel):
         self.notify.warning('addRotShove() -- Not Implemented Yet!')
+        '''newRot = rotVel - self.pet.getHpr()
+        self.pet.setHpr(newRot)'''
     
     def destroy(self):
         self.demand("Off")
