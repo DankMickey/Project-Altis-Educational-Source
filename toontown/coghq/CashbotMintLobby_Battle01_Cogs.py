@@ -1,14 +1,15 @@
 from toontown.coghq.SpecImports import *
 from toontown.toonbase import ToontownGlobals
 import random
-a = random.choice([0, 1, 2, 3, 4])
-b = random.choice([0, 1, 2, 3, 4])
-c = random.choice([0, 1, 2, 3, 4])
-d = random.choice([0, 1, 2, 3, 4])
-e = random.choice([0, 1, 2, 3, 4])
-f = random.choice([0, 1, 2, 3, 4])
-g = random.choice([0, 1, 2, 3, 4])
-h = random.choice([0, 1, 2, 3, 4])
+a = random.choice([0, 1, 2, 3, 4, 5])
+b = random.choice([0, 1, 2, 3, 4, 5])
+c = random.choice([0, 1, 2, 3, 4, 5])
+d = random.choice([0, 1, 2, 3, 4, 5])
+e = random.choice([0, 1, 2, 3, 4, 5])
+f = random.choice([0, 1, 2, 3, 4, 5])
+g = random.choice([0, 1, 2, 3, 4, 5])
+h = random.choice([0, 1, 2, 3, 4, 5])
+SideParent = 0
 if a==1:
 	b=0
 	c=0
@@ -17,6 +18,8 @@ if a==1:
 	f=0
 	g=0
 	h=0
+	SideParent = 10000
+	BattleSideCellId = 0
 elif b==1:
 	a=0
 	c=0
@@ -25,6 +28,8 @@ elif b==1:
 	f=0
 	g=0
 	h=0
+	SideParent = 20000
+	BattleSideCellId = 1
 elif c==1:
 	a=0
 	b=0
@@ -33,6 +38,8 @@ elif c==1:
 	f=0
 	g=0
 	h=0
+	SideParent = 20001
+	BattleSideCellId = 2
 elif d==1:
 	a=0
 	b=0
@@ -41,6 +48,8 @@ elif d==1:
 	f=0
 	g=0
 	h=0
+	SideParent = 20002
+	BattleSideCellId = 3
 elif e==1:
 	a=0
 	b=0
@@ -49,6 +58,8 @@ elif e==1:
 	f=0
 	g=0
 	h=0
+	SideParent = 20003
+	BattleSideCellId = 4
 elif f==1:
 	a=0
 	b=0
@@ -57,6 +68,8 @@ elif f==1:
 	e=0
 	g=0
 	h=0
+	SideParent = 20004
+	BattleSideCellId = 5
 elif g==1:
 	a=0
 	b=0
@@ -65,6 +78,8 @@ elif g==1:
 	e=0
 	f=0
 	h=0
+	SideParent = 20005
+	BattleSideCellId = 6
 else:
 	a=0
 	b=0
@@ -74,6 +89,8 @@ else:
 	f=0
 	g=0
 	h=1
+	SideParent = 20006
+	BattleSideCellId = 7
 CogParent = 10000
 AParent = 20000
 BParent = 20001
@@ -177,5 +194,32 @@ CogData = [{'parentEntId': CogParent,
   'h': 0,
   'behavior': 'stand',
   'path': None,
-  'skeleton': 1}]
+  'skeleton': 1},
+ {'parentEntId': SideParent,
+  'boss': 0,
+  'level': 10,
+  'battleCell': BattleSideCellId,
+  'pos': Point3(50, -20, -25),
+  'h': 180,
+  'behavior': 'stand',
+  'path': None,
+  'skeleton': 0},
+ {'parentEntId': SideParent,
+  'boss': 0,
+  'level': 10,
+  'battleCell': BattleSideCellId,
+  'pos': Point3(50, -60, -25),
+  'h': 180,
+  'behavior': 'stand',
+  'path': None,
+  'skeleton': 0},
+ {'parentEntId': SideParent,
+  'boss': 0,
+  'level': 11,
+  'battleCell': BattleSideCellId,
+  'pos': Point3(56, -50, -25),
+  'h': 180,
+  'behavior': 'stand',
+  'path': None,
+  'skeleton': 0}]
 ReserveCogData = []
