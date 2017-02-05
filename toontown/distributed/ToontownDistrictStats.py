@@ -87,3 +87,7 @@ class ToontownDistrictStats(DistributedObject.DistributedObject):
     def setStats(self, avatarCount, newAvatarCount):
         self.setAvatarCount(avatarCount)
         self.setNewAvatarCount(newAvatarCount)
+        
+    def setGroupToonCount(self, groupToonCount):
+        if self.toontownDistrictId in self.cr.activeDistrictMap:
+            self.cr.activeDistrictMap[self.districtId].groupToonCount = groupToonCount
