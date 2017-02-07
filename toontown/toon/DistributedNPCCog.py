@@ -8,4 +8,4 @@ class DistributedNPCCog(DistributedNPCToon):
         self.npcType = "Cog"
 
     def initPos(self):
-        self.setCheesyEffect(37, 0, 0)
+        self.putOnSuit('f')
