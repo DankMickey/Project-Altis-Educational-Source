@@ -2259,13 +2259,14 @@ class Toon(Avatar.Avatar, ToonHead):
             self.effectTrack = None
 
     def __doHeadScale(self, scale, lerpTime):
+	
+        if not self.getGeomNode():
+            self.notify.warning("A error has occured when attempting to scale Toon!")
+            return
         if scale == None:
             scale = ToontownGlobals.toonHeadScales[self.style.getAnimal()]
         
         track = Parallel()
-        if not self.getGeomNode():
-            self.notify.warning("A error has occured when attempting to scale Toon!")
-            return track
         if not self.headParts:
             return track
         
@@ -2276,15 +2277,16 @@ class Toon(Avatar.Avatar, ToonHead):
         return track
 
     def __doLegsScale(self, scale, lerpTime):
+	
+        if not self.getGeomNode():
+            self.notify.warning("A error has occured when attempting to scale Toon!")
+            return
         if scale == None:
             scale = 1
             invScale = 1
         else:
             invScale = 1.0 / scale
         track = Parallel()
-        if not self.getGeomNode():
-            self.notify.warning("A error has occured when attempting to scale Toon!")
-            return track
         if not self.legsParts:
             return track
         for li in xrange(self.legsParts.getNumPaths()):
