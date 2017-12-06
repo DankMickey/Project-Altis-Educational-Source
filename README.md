@@ -3,32 +3,19 @@
 # Project Altis
 Project Altis is a private server for Disney's now defunct MMO-RPG, Toontown Online.
 
-## Contributors
+This source code contains various exploits and vulnerabilities, it is **not intended for use**.
 
-### Director
-* Dubito
-* Judge | BVF
+This source code was completely depricated in March of 2016, and hasn't been used since.
 
-### Assistant Director
-* Drew C.
+This is now going public and archived due to it's un-used nature.
 
-### Lead Developer
-* SkippsDev
+Feel free to use it as a reference for learning.
 
-### Content Director
-* Loopy Goopy
+You are more than welcome to use any source code from this repository under the conditions of it's License.
 
-### Programmer
-* Barker Dee
-* Dan
-* SirTubbyCheezyfish
-* Xanon
-
-### Modeler
-* Old Geezer
-
-### Composer
-* Old Geezer
+  1. A copy of the license must be present and the works must be under Apache 2.0
+  2. A list of changes must be listed.
+  3. A note in regards to the usage of this repository must be noted.
 
 ## License
 Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
